@@ -19,7 +19,7 @@ import torchvision.transforms as transforms
 import torchvision.utils as vutils
 from torch.autograd import backward
 
-from trainer import train, get_value, RunSpec, tensors_to_device
+from pytorch_igniter import train, get_value, RunSpec, tensors_to_device
 
 # Define a model
 

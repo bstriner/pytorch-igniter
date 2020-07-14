@@ -22,6 +22,8 @@ from torch.autograd import backward
 from pytorch_igniter import train, get_value, RunSpec
 
 # Define a model
+
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -42,7 +44,7 @@ class Model(nn.Module):
         return torch.mean(self.model(input), dim=(2, 3))
 
 
-def train_mnist_classifier(dataroot, batch_size, workers, device,max_epochs, **train_args):
+def train_mnist_classifier(dataroot, batch_size, workers, device, max_epochs, **train_args):
 
     # Create data loaders
     train_loader = data.DataLoader(dset.MNIST(root=dataroot, download=True, train=True,
@@ -108,11 +110,15 @@ def train_mnist_classifier(dataroot, batch_size, workers, device,max_epochs, **t
         'loss': 'loss',
         'accuracy': 'accuracy'
     }
-    
+
     # Objects to save
     to_save = {
         "model": model,
         "optimizer": optimizer
+    }
+
+    params = {
+        
     }
 
     train(
@@ -145,6 +151,8 @@ def parse_args():
                         help="learning rate")
     parser.add_argument("--no-cuda", action="store_true", help="disables cuda")
     parser.add_argument("--output-dir", default='output/mnist/advanced',
+                        help="directory to output images and model checkpoints")
+    parser.add_argument("--mlflow-tracking-uri", type=str,
                         help="directory to output images and model checkpoints")
     args = parser.parse_args()
     return args
