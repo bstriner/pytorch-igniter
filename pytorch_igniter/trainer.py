@@ -41,18 +41,28 @@ def train(
     mlflow_tracking_uri=None,
     parameters=None
 ):
-    os.makedirs(output_dir, exist_ok=True)
-    run_fname = os.path.join(output_dir, RUN_FNAME)
-
     if mlflow_enable:
-        if os.path.exists(run_fname):
-            with open(run_fname) as f:
-                run_id = yaml.load(f)['info']['run_id']
+        active_run = mlflow.active_run()
+        run_id = None
+        if 'MLFLOW_RUN_ID' in os.environ:
+            print("Active MLflow run")
+            run_id = os.environ['MLFLOW_RUN_ID']
+            output_dir = os.path.join(output_dir, run_id)
+            run_fname = os.path.join(output_dir, RUN_FNAME)    
         else:
-            run_id = None
+            run_fname = os.path.join(output_dir, RUN_FNAME)    
+            if os.path.exists(run_fname):
+                print("Resume MLflow run")
+                with open(run_fname) as f:
+                    run_id = yaml.load(f, Loader=yaml.SafeLoader)['info']['run_id']
+            else:
+                print("New MLflow run")
+                run_id = None
         ctx = mlflow.start_run(run_id=run_id)
     else:
         ctx = contextlib.nullcontext()
+
+    os.makedirs(output_dir, exist_ok=True)
 
     with ctx:
         if mlflow_enable:
@@ -61,6 +71,7 @@ def train(
             if not os.path.exists(run_fname):
                 if parameters is not None:
                     mlflow.log_params(parameters)
+                active_run = mlflow.get_run(active_run.info.run_id)
                 with open(run_fname, 'w') as f:
                     yaml.dump(active_run.to_dictionary(), f)
         else:

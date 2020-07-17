@@ -44,7 +44,7 @@ class Model(nn.Module):
         return torch.mean(self.model(input), dim=(2, 3))
 
 
-def train_mnist_classifier(dataroot, batch_size, workers, device, max_epochs, **train_args):
+def train_mnist_classifier(dataroot, batch_size, workers, device, max_epochs, learning_rate, **train_args):
 
     # Create data loaders
     train_loader = data.DataLoader(dset.MNIST(root=dataroot, download=True, train=True,
@@ -56,7 +56,7 @@ def train_mnist_classifier(dataroot, batch_size, workers, device, max_epochs, **
 
     # Create model, optimizer, and criteria
     model = Model().to(device)
-    optimizer = torch.optim.Adam(params=model.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(params=model.parameters(), lr=learning_rate)
     criteria = nn.CrossEntropyLoss(reduction='none')
 
     # Single step of training
@@ -117,8 +117,9 @@ def train_mnist_classifier(dataroot, batch_size, workers, device, max_epochs, **
         "optimizer": optimizer
     }
 
-    params = {
-        
+    parameters = {
+        "learning_rate": learning_rate,
+        "batch_size": batch_size
     }
 
     train(
@@ -134,6 +135,7 @@ def train_mnist_classifier(dataroot, batch_size, workers, device, max_epochs, **
             loader=eval_loader,
             metrics=metrics
         ),
+        parameters=parameters,
         **train_args
     )
 
@@ -148,8 +150,9 @@ def parse_args():
     parser.add_argument("--max-epochs", type=int, default=25,
                         help="number of epochs to train for")
     parser.add_argument("--learning-rate", type=float, default=0.0003,
-                        help="learning rate")
-    parser.add_argument("--no-cuda", action="store_true", help="disables cuda")
+                        help="learning rate")    
+    parser.add_argument("--device", type=str,
+                        default='cuda:0' if torch.cuda.is_available() else 'cpu', help="device to use")
     parser.add_argument("--output-dir", default='output/mnist/advanced',
                         help="directory to output images and model checkpoints")
     parser.add_argument("--mlflow-tracking-uri", type=str,
@@ -160,15 +163,8 @@ def parse_args():
 
 def main():
     args = parse_args()
-    device = "cpu" if (not torch.cuda.is_available()
-                       or args.no_cuda) else "cuda:0"
     train_mnist_classifier(
-        dataroot=args.dataroot,
-        batch_size=args.batch_size,
-        workers=args.workers,
-        output_dir=args.output_dir,
-        device=device,
-        max_epochs=args.max_epochs
+        **vars(args)
     )
 
 

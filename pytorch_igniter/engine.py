@@ -12,23 +12,32 @@ PLOT_FNAME = "plot.svg"
 
 def build_engine(
     spec: RunSpec,
-    output_dir,
+    output_dir=None,
     trainer=None,
     metric_cls=RunningAverage,
     tag="",
-    mlflow_logger=None
+    mlflow_logger=None,
+    is_training=None
 ):
-    plot_fname = os.path.join(output_dir, "{}-{}".format(tag, PLOT_FNAME))
-    logs_fname = os.path.join(output_dir, "{}-{}".format(tag, LOGS_FNAME))
+    if spec.plot_event is not None or spec.log_event is not None:
+        assert output_dir is not None
+        plot_fname = os.path.join(output_dir, "{}-{}".format(tag, PLOT_FNAME))
+        logs_fname = os.path.join(output_dir, "{}-{}".format(tag, LOGS_FNAME))
+    else:
+        plot_fname = None
+        logs_fname = None
     # Create engine
     engine = Engine(spec.step)
     if trainer is None:
         # training
         trainer = engine
-        spec.set_defaults(is_training=True)
+        if is_training is None:
+            is_training = True
     else:
         # evaluation
-        spec.set_defaults(is_training=False)
+        if is_training is None:
+            is_training = False
+    spec.set_defaults(is_training=is_training)
 
     # Attach metrics
     for name, metric in spec.metrics.items():

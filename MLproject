@@ -1,0 +1,35 @@
+name: Pytorch Igniter
+
+# conda_env: my_env.yaml
+# Can have a docker_env instead of a conda_env, e.g.
+# docker_env:
+#    image:  mlflow-docker-example
+
+entry_points:
+  mlp:
+    parameters:
+      learning_rate:
+        type: float
+        default: 0.001
+      batch_size:
+        type: int
+        default: 32
+    command: "python examples/mlflow_parameters.py"
+  main:
+    parameters:
+      output_dir:
+        type: string
+        default: output/mlflow
+      learning_rate:
+        type: float
+        default: 0.001
+      batch_size:
+        type: int
+        default: 32
+      workers:
+        type: int
+        default: 2
+      dataroot:
+        type: string
+        default: data
+    command: "python examples/train_mnist_advanced.py --output-dir {output_dir} --learning-rate {learning_rate} --batch-size {batch_size} --workers {workers} --dataroot {dataroot}"
