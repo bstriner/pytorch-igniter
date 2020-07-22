@@ -15,7 +15,8 @@ import torch.utils.data as data
 
 from ignite.engine import Engine, Events
 from ignite.handlers import ModelCheckpoint, Timer
-from ignite.metrics import RunningAverage, Average
+from ignite.metrics import RunningAverage
+from pytorch_igniter.metrics import SafeAverage
 
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
@@ -23,7 +24,7 @@ from torch.autograd import backward
 import yaml
 from .spec import RunSpec
 from .engine import build_engine
-from .util import handle_exception, get_last_checkpoint
+from .util import handle_exception, get_last_checkpoint, get_metrics
 RUN_FNAME = 'run.yaml'
 LOADED = "Loaded {}, epoch {}, iteration {}"
 COMPLETE = "Training complete"
@@ -48,13 +49,14 @@ def train(
             print("Active MLflow run")
             run_id = os.environ['MLFLOW_RUN_ID']
             output_dir = os.path.join(output_dir, run_id)
-            run_fname = os.path.join(output_dir, RUN_FNAME)    
+            run_fname = os.path.join(output_dir, RUN_FNAME)
         else:
-            run_fname = os.path.join(output_dir, RUN_FNAME)    
+            run_fname = os.path.join(output_dir, RUN_FNAME)
             if os.path.exists(run_fname):
                 print("Resume MLflow run")
                 with open(run_fname) as f:
-                    run_id = yaml.load(f, Loader=yaml.SafeLoader)['info']['run_id']
+                    run_id = yaml.load(f, Loader=yaml.SafeLoader)[
+                        'info']['run_id']
             else:
                 print("New MLflow run")
                 run_id = None
@@ -111,7 +113,7 @@ def train(
                         mlflow_logger=mlflow_logger,
                         tag=tag,
                         trainer=trainer,
-                        metric_cls=Average
+                        metric_cls=SafeAverage
                     ),
                     spec
                 )
@@ -164,3 +166,4 @@ def train(
                 train_spec.loader,
                 max_epochs=train_spec.max_epochs,
                 epoch_length=train_spec.epoch_length)
+    return get_metrics(engine=trainer)

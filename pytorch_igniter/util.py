@@ -1,3 +1,5 @@
+
+from collections import OrderedDict
 import torch
 from ignite.engine import Events
 import os
@@ -6,22 +8,34 @@ import re
 from tqdm import tqdm
 from ignite.handlers import ModelCheckpoint, Timer
 from ignite.metrics import RunningAverage
+from torch import nn
 
 EVAL_MESSAGE = "[{epoch}/{max_epochs}][{i}/{max_i}][Evaluation]"
 TRAIN_MESSAGE = "[{epoch}/{max_epochs}][{i}/{max_i}]"
 INTERRUPTED = "KeyboardInterrupt caught. Exiting gracefully."
 
+
+class StateDictStorage(nn.Module):
+    def __init__(self):
+        super(StateDictStorage, self).__init__()
+        self._state_dict = None
+
+    def load_state_dict(self, state_dict, strict=True):
+        self._state_dict = state_dict
+
+    def state_dict(self):
+        return self._state_dict
+
+
 def get_metrics(engine, metric_names='all'):
     if metric_names == 'all':
-        metrics = engine.state.metrics.items()
+        metrics = engine.state.metrics
     else:
-        metrics = [(metric, engine.state.metrics[metric])
-                   for metric in metric_names]
-    for name, value in metrics:
-        if torch.is_tensor(value):
-            yield name, value.item()
-        else:
-            yield name, value
+        metrics = OrderedDict([
+            (metric_name, engine.state.metrics[metric_name])
+            for metric_name in metric_names
+        ])
+    return apply_to_tensors(metrics, fn=lambda tensor: tensor.item())
 
 
 def print_logs(engine, trainer=None, fmt=TRAIN_MESSAGE, metric_names='all'):
@@ -34,7 +48,7 @@ def print_logs(engine, trainer=None, fmt=TRAIN_MESSAGE, metric_names='all'):
         ((engine.state.epoch-1)*engine.state.epoch_length),
         max_i=engine.state.epoch_length
     )
-    for name, value in get_metrics(engine, metric_names=metric_names):
+    for name, value in get_metrics(engine, metric_names=metric_names).items():
         message += " | {name}: {value}".format(
             name=name, value=str(round(value, 3)))
     tqdm.write(message)
@@ -45,7 +59,7 @@ def save_logs(engine, fname, trainer=None, metric_names='all'):
         trainer = engine
     columns = ['iteration', 'epoch']
     values = [str(trainer.state.iteration), str(trainer.state.epoch)]
-    for key, value in get_metrics(engine, metric_names=metric_names):
+    for key, value in get_metrics(engine, metric_names=metric_names).items():
         columns.append(key)
         values.append(str(round(value, 5)))
     with open(fname, "a") as f:
@@ -92,6 +106,22 @@ def handle_exception(engine, e, callback=None, **kwargs):
             callback(engine, **kwargs)
     else:
         raise e
+
+
+def load_from(output_dir, to_load):
+    path, iteration = find_last_checkpoint(output_dir)
+    if path is None:
+        raise FileNotFoundError("No checkpoints found in {}".format(path))
+    loaded = torch.load(path)
+    for k, v in to_load.items():
+        v.load_state_dict(loaded[k])
+    return path, iteration
+
+
+def find_last_checkpoint(output_dir):
+    checkpoint_handler = ModelCheckpoint(
+        output_dir, filename_prefix="", require_empty=False)
+    return get_last_checkpoint(checkpoint_handler=checkpoint_handler)
 
 
 def get_last_checkpoint(checkpoint_handler: ModelCheckpoint):
@@ -167,7 +197,7 @@ def apply_to_tensors(tensors, fn):
     elif isinstance(tensors, tuple):
         return tuple(apply_to_tensors(tensor, fn) for tensor in tensors)
     elif isinstance(tensors, dict):
-        return dict((k, apply_to_tensors(tensor, fn)) for k, tensor in tensors.items())
+        return OrderedDict((k, apply_to_tensors(tensor, fn)) for k, tensor in tensors.items())
     else:
         return tensors
 
