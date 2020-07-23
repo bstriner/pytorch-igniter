@@ -35,8 +35,7 @@ def get_metrics(engine, metric_names='all'):
             (metric_name, engine.state.metrics[metric_name])
             for metric_name in metric_names
         ])
-    return apply_to_tensors(metrics, fn=lambda tensor: tensor.item())
-
+    return tensors_to_items(metrics)
 
 def print_logs(engine, trainer=None, fmt=TRAIN_MESSAGE, metric_names='all'):
     if trainer is None:
@@ -206,6 +205,12 @@ def tensors_to_device(device):
     def fn(tensors):
         return apply_to_tensors(tensors=tensors, fn=lambda tensor: tensor.to(device))
     return fn
+
+def tensors_to_items(tensors):
+    return apply_to_tensors(tensors=tensors, fn=lambda tensor: tensor.item())
+
+def tensors_to_numpy(tensors):
+    return apply_to_tensors(tensors=tensors, fn=lambda tensor: tensor.detach().cpu().numpy())
 
 
 def timer_metric(engine, name='timer'):

@@ -80,7 +80,7 @@ def build_engine(
 
     # Optional user callback for additional configuration
     if spec.callback is not None:
-        spec.callback(engine)
+        spec.callback(engine, trainer)
 
     if mlflow_logger is not None and spec.log_event is not None:
         mlflow_logger.attach(
