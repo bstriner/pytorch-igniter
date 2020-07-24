@@ -39,6 +39,7 @@ def get_metrics(engine, metric_names='all'):
         ])
     return tensors_to_items(metrics)
 
+
 def print_logs(engine, trainer=None, fmt=TRAIN_MESSAGE, metric_names='all'):
     if trainer is None:
         trainer = engine
@@ -99,7 +100,7 @@ def create_plots(engine, logs_fname, plots_fname, metric_names='all'):
             plt.close(fig)
 
 
-#todo: add sigint handling
+# todo: add sigint handling
 def handle_exception(engine, e, callback=None, **kwargs):
     if isinstance(e, KeyboardInterrupt):
         engine.terminate()
@@ -109,30 +110,33 @@ def handle_exception(engine, e, callback=None, **kwargs):
     else:
         raise e
 
-#https://gist.github.com/etcd/53c48b47ae98e2f05d1673ea89ed4aee
-@contextmanager
-def capture_SIGINT(callback=None, **kwargs):
-    # save original SIGINT handler
-    original_SIGINT_handler = signal.getsignal(signal.SIGINT)
 
-    # define new signal handler
-    def handle_SIGINT(signal, frame):
+def kill_signals():
+    signals = [signal.SIGINT, signal.SIGTERM]
+    if hasattr(signal, 'SIGKILL'):
+        signals.append(signal.SIGKILL)
+    return signals
+
+
+@contextmanager
+def capture_signals(signals=None, callback=None, **kwargs):
+    if signals is None:
+        signals = kill_signals()
+    original_handlers = [signal.getsignal(sig) for sig in signals]
+
+    def handle_signal(sig, frame):
         if callback is not None:
             callback(**kwargs)
-        raise KeyboardInterrupt("Received SIGINT")
+        raise KeyboardInterrupt("Received signal {}".format(sig))
 
-    # install the new SIGINT handler
-    signal.signal(signal.SIGINT, handle_SIGINT)
-
+    for sig in signals:
+        signal.signal(sig, handle_signal)
     try:
         yield
-    except Exception as e:
-        raise
     finally:
-        # when leaving contextmanager, reinstall old SIGINT handler
-        # note: only works if old SIGINT handler was originally installed by Python
-        signal.signal(signal.SIGINT, original_SIGINT_handler)
-
+        # note: only works if old handler was originally installed by Python
+        for sig, original_handler in zip(signals, original_handlers):
+            signal.signal(sig, original_handler)
 
 
 def load_from(output_dir, to_load):
@@ -234,8 +238,10 @@ def tensors_to_device(device):
         return apply_to_tensors(tensors=tensors, fn=lambda tensor: tensor.to(device))
     return fn
 
+
 def tensors_to_items(tensors):
     return apply_to_tensors(tensors=tensors, fn=lambda tensor: tensor.item())
+
 
 def tensors_to_numpy(tensors):
     return apply_to_tensors(tensors=tensors, fn=lambda tensor: tensor.detach().cpu().numpy())

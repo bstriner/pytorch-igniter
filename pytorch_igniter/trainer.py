@@ -25,7 +25,7 @@ from torch.autograd import backward
 import yaml
 from .spec import RunSpec
 from .engine import build_engine
-from .util import handle_exception, get_last_checkpoint, get_metrics, capture_SIGINT
+from .util import handle_exception, get_last_checkpoint, get_metrics, capture_signals
 
 LOADED = "Loaded {}, epoch {}, iteration {}"
 COMPLETE = "Training complete"
@@ -122,7 +122,7 @@ def train(
 
         # Get last checkpoint
         checkpoint_file, _ = get_last_checkpoint(checkpoint_handler)
-        with capture_SIGINT(
+        with capture_signals(
                 callback=checkpoint_handler,
                 engine=trainer,
                 to_save=to_save):
