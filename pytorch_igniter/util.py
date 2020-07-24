@@ -113,8 +113,8 @@ def handle_exception(engine, e, callback=None, **kwargs):
 
 def kill_signals():
     signals = [signal.SIGINT, signal.SIGTERM]
-    if hasattr(signal, 'SIGKILL'):
-        signals.append(signal.SIGKILL)
+    if hasattr(signal, 'SIGHUP'):
+        signals.append(signal.SIGHUP)
     return signals
 
 
