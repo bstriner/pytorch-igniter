@@ -29,13 +29,14 @@ def mlflow_ctx(
             print("MLflow ID {} from environment".format(run_id))
             return mlflow.start_run(run_id=run_id), output_dir
         # Check saved run id
-        run_fname = os.path.join(output_dir, RUN_FNAME)
-        if os.path.exists(run_fname):
-            with open(run_fname) as f:
-                run_id = yaml.load(f, Loader=yaml.SafeLoader)[
-                    'info']['run_id']
-            print("MLflow ID {} from run file".format(run_id))
-            return mlflow.start_run(run_id=run_id), output_dir
+        if output_dir is not None:
+            run_fname = os.path.join(output_dir, RUN_FNAME)
+            if os.path.exists(run_fname):
+                with open(run_fname) as f:
+                    run_id = yaml.load(f, Loader=yaml.SafeLoader)[
+                        'info']['run_id']
+                print("MLflow ID {} from run file".format(run_id))
+                return mlflow.start_run(run_id=run_id), output_dir
         # New run
         if allow_new:
             print("MLflow new run")
@@ -48,12 +49,13 @@ def mlflow_ctx(
 def get_mlflow_logger(output_dir, mlflow_enable):
     if mlflow_enable:
         mlflow_logger = MLflowLogger()
-        run_fname = os.path.join(output_dir, RUN_FNAME)
-        if not os.path.exists(run_fname):
-            active_run = mlflow.active_run()
-            active_run = mlflow.get_run(active_run.info.run_id)
-            with open(run_fname, 'w') as f:
-                yaml.dump(active_run.to_dictionary(), f)
+        if output_dir is not None:
+            run_fname = os.path.join(output_dir, RUN_FNAME)
+            if not os.path.exists(run_fname):
+                active_run = mlflow.active_run()
+                active_run = mlflow.get_run(active_run.info.run_id)
+                with open(run_fname, 'w') as f:
+                    yaml.dump(active_run.to_dictionary(), f)
         return mlflow_logger
     else:
         return None
