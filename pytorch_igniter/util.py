@@ -97,6 +97,7 @@ def create_plots(engine, logs_fname, plots_fname, metric_names='all'):
             plt.close(fig)
 
 
+#todo: add sigint handling
 def handle_exception(engine, e, callback=None, **kwargs):
     if isinstance(e, KeyboardInterrupt):
         engine.terminate()
