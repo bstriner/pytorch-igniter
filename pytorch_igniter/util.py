@@ -11,6 +11,7 @@ from ignite.metrics import RunningAverage
 from torch import nn
 import signal
 from contextlib import contextmanager
+import numpy as np
 
 EVAL_MESSAGE = "[{epoch}/{max_epochs}][{i}/{max_i}][Evaluation]"
 TRAIN_MESSAGE = "[{epoch}/{max_epochs}][{i}/{max_i}]"
@@ -37,7 +38,14 @@ def get_metrics(engine, metric_names='all'):
             (metric_name, engine.state.metrics[metric_name])
             for metric_name in metric_names
         ])
-    return tensors_to_items(metrics)
+    metrics = tensors_to_numpy(metrics)
+    metrics = OrderedDict([
+        (k, np.array(v).item())
+        for k, v
+        in metrics.items()
+        if np.array(v).size == 1
+    ])
+    return metrics
 
 
 def print_logs(engine, trainer=None, fmt=TRAIN_MESSAGE, metric_names='all'):
