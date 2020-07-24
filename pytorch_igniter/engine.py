@@ -3,7 +3,7 @@ from .spec import RunSpec
 import os
 from ignite.metrics import RunningAverage
 from ignite.engine import Engine, Events
-from .util import auto_metric, timer_metric, print_logs, save_logs, create_plots
+from .util import chain_callbacks, auto_metric, timer_metric, print_logs, save_logs, create_plots
 from ignite.contrib.handlers import ProgressBar
 from ignite.contrib.handlers.mlflow_logger import OutputHandler, global_step_from_engine
 LOGS_FNAME = "logs.tsv"
@@ -79,8 +79,10 @@ def build_engine(
             metric_names=spec.plot_metrics)
 
     # Optional user callback for additional configuration
-    if spec.callback is not None:
-        spec.callback(engine, trainer)
+    chain_callbacks(
+        callbacks=spec.callback,
+        engine=engine,
+        trainer=trainer)
 
     if mlflow_logger is not None and spec.log_event is not None:
         mlflow_logger.attach(

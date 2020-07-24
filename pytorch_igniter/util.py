@@ -111,6 +111,16 @@ def handle_exception(engine, e, callback=None, **kwargs):
         raise e
 
 
+def chain_callbacks(callbacks=None, **kwargs):
+    if callbacks is not None:
+        if isinstance(callbacks, (list, tuple)):
+            for callback in callbacks:
+                if callback is not None:
+                    callback(**kwargs)
+        else:
+            callback(**kwargs)
+
+
 def kill_signals():
     signals = [signal.SIGINT, signal.SIGTERM]
     if hasattr(signal, 'SIGHUP'):
