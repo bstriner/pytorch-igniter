@@ -25,7 +25,7 @@ from torch.autograd import backward
 import yaml
 from .spec import RunSpec
 from .engine import build_engine
-from .util import handle_exception, get_last_checkpoint, get_metrics
+from .util import handle_exception, get_last_checkpoint, get_metrics, capture_SIGINT
 
 LOADED = "Loaded {}, epoch {}, iteration {}"
 COMPLETE = "Training complete"
@@ -45,7 +45,8 @@ def train(
 ):
     if mlflow_tracking_uri is not None:
         mlflow.set_tracking_uri(mlflow_tracking_uri)
-    ctx, output_dir = mlflow_ctx(output_dir=output_dir, mlflow_enable=mlflow_enable)
+    ctx, output_dir = mlflow_ctx(
+        output_dir=output_dir, mlflow_enable=mlflow_enable)
     os.makedirs(output_dir, exist_ok=True)
     with ctx:
         mlflow_logger = get_mlflow_logger(
@@ -121,23 +122,27 @@ def train(
 
         # Get last checkpoint
         checkpoint_file, _ = get_last_checkpoint(checkpoint_handler)
-        if checkpoint_file:
-            # Load checkpoint
-            checkpoint_data = torch.load(checkpoint_file)
-            for key, value in to_save.items():
-                value.load_state_dict(checkpoint_data[key])
-            tqdm.write(LOADED.format(
-                checkpoint_file, trainer.state.epoch, trainer.state.iteration))
-            if Engine._is_done(trainer.state):
-                # Training complete
-                tqdm.write(COMPLETE)
+        with capture_SIGINT(
+                callback=checkpoint_handler,
+                engine=trainer,
+                to_save=to_save):
+            if checkpoint_file:
+                # Load checkpoint
+                checkpoint_data = torch.load(checkpoint_file)
+                for key, value in to_save.items():
+                    value.load_state_dict(checkpoint_data[key])
+                tqdm.write(LOADED.format(
+                    checkpoint_file, trainer.state.epoch, trainer.state.iteration))
+                if Engine._is_done(trainer.state):
+                    # Training complete
+                    tqdm.write(COMPLETE)
+                else:
+                    # Continue training
+                    trainer.run(train_spec.loader)
             else:
-                # Continue training
-                trainer.run(train_spec.loader)
-        else:
-            # Start training
-            trainer.run(
-                train_spec.loader,
-                max_epochs=train_spec.max_epochs,
-                epoch_length=train_spec.epoch_length)
+                # Start training
+                trainer.run(
+                    train_spec.loader,
+                    max_epochs=train_spec.max_epochs,
+                    epoch_length=train_spec.epoch_length)
     return get_metrics(engine=trainer)

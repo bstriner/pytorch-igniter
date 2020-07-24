@@ -9,6 +9,8 @@ from tqdm import tqdm
 from ignite.handlers import ModelCheckpoint, Timer
 from ignite.metrics import RunningAverage
 from torch import nn
+import signal
+from contextlib import contextmanager
 
 EVAL_MESSAGE = "[{epoch}/{max_epochs}][{i}/{max_i}][Evaluation]"
 TRAIN_MESSAGE = "[{epoch}/{max_epochs}][{i}/{max_i}]"
@@ -106,6 +108,31 @@ def handle_exception(engine, e, callback=None, **kwargs):
             callback(engine, **kwargs)
     else:
         raise e
+
+#https://gist.github.com/etcd/53c48b47ae98e2f05d1673ea89ed4aee
+@contextmanager
+def capture_SIGINT(callback=None, **kwargs):
+    # save original SIGINT handler
+    original_SIGINT_handler = signal.getsignal(signal.SIGINT)
+
+    # define new signal handler
+    def handle_SIGINT(signal, frame):
+        if callback is not None:
+            callback(**kwargs)
+        raise KeyboardInterrupt("Received SIGINT")
+
+    # install the new SIGINT handler
+    signal.signal(signal.SIGINT, handle_SIGINT)
+
+    try:
+        yield
+    except Exception as e:
+        raise
+    finally:
+        # when leaving contextmanager, reinstall old SIGINT handler
+        # note: only works if old SIGINT handler was originally installed by Python
+        signal.signal(signal.SIGINT, original_SIGINT_handler)
+
 
 
 def load_from(output_dir, to_load):
