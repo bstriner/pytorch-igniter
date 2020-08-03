@@ -4,6 +4,12 @@ import contextlib
 from ignite.contrib.handlers.mlflow_logger import MLflowLogger
 import yaml
 
+class NullContext(object):
+    def __enter__(self):
+        pass
+    def __exit__(self):
+        pass
+
 RUN_FNAME = 'run.yaml'
 
 def mlflow_ctx(
@@ -17,7 +23,7 @@ def mlflow_ctx(
         active_run = mlflow.active_run()
         if active_run is not None:
             print("MLflow ID {} active".format(active_run.info.run_id))
-            return contextlib.nullcontext(), output_dir
+            return NullContext(), output_dir
         # Use argument
         if run_id is not None:
             print("MLflow ID {} set".format(run_id))
@@ -44,7 +50,7 @@ def mlflow_ctx(
         else:
             raise ValueError("No existing MLflow run found")
     else:
-        return  contextlib.nullcontext(), output_dir
+        return  NullContext(), output_dir
 
 def get_mlflow_logger(output_dir, mlflow_enable):
     if mlflow_enable:
