@@ -7,7 +7,7 @@ import yaml
 class NullContext(object):
     def __enter__(self):
         pass
-    def __exit__(self):
+    def __exit__ (self, type, value, tb):
         pass
 
 RUN_FNAME = 'run.yaml'

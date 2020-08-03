@@ -49,7 +49,7 @@ def get_metrics(engine, metric_names='all'):
 
 
 def print_logs(engine, trainer=None, fmt=TRAIN_MESSAGE, metric_fmt=" | {name}: {value}",
- metric_names='all'):
+               metric_names='all'):
     if trainer is None:
         trainer = engine
     message = fmt.format(
@@ -176,8 +176,21 @@ def find_last_checkpoint(output_dir):
 
 def get_last_checkpoint(checkpoint_handler: ModelCheckpoint):
     dirname = checkpoint_handler.save_handler.dirname
-    fmt = "{}checkpoint_(\\d+){}".format(checkpoint_handler._fname_prefix,
-                                         checkpoint_handler._ext)
+    if hasattr(checkpoint_handler, '_fname_prefix'):
+        filename_prefix = checkpoint_handler._fname_prefix
+    elif hasattr(checkpoint_handler, "filename_prefix"):
+        filename_prefix = checkpoint_handler.filename_prefix
+    else:
+        filename_prefix = ""
+    if hasattr(checkpoint_handler, '_ext'):
+        ext = checkpoint_handler._ext
+    elif hasattr(checkpoint_handler, "ext"):
+        ext = checkpoint_handler.ext
+    else:
+        ext = "pt"
+    if not ext.startswith("."):
+        ext = ".{}".format(ext)
+    fmt = "{}checkpoint_(\\d+){}".format(filename_prefix, ext)
 
     def parse(fn):
         m = re.match(fmt, fn)
