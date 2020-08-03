@@ -48,7 +48,8 @@ def get_metrics(engine, metric_names='all'):
     return metrics
 
 
-def print_logs(engine, trainer=None, fmt=TRAIN_MESSAGE, metric_names='all'):
+def print_logs(engine, trainer=None, fmt=TRAIN_MESSAGE, metric_fmt=" | {name}: {value}",
+ metric_names='all'):
     if trainer is None:
         trainer = engine
     message = fmt.format(
@@ -59,7 +60,7 @@ def print_logs(engine, trainer=None, fmt=TRAIN_MESSAGE, metric_names='all'):
         max_i=engine.state.epoch_length
     )
     for name, value in get_metrics(engine, metric_names=metric_names).items():
-        message += " | {name}: {value}".format(
+        message += metric_fmt.format(
             name=name, value=str(round(value, 3)))
     tqdm.write(message)
 

@@ -75,6 +75,7 @@ class RunSpec(object):
         print_event='default',
         print_metrics='all',
         print_fmt='default',
+        print_metric_fmt=' | {name}: {value}',
         log_event='default',
         log_metrics='all',
         plot_event='default',
@@ -92,6 +93,7 @@ class RunSpec(object):
         self.print_event = print_event
         self.print_metrics = print_metrics
         self.print_fmt = print_fmt
+        self.print_metric_fmt = print_metric_fmt
         self.log_event = log_event
         self.log_metrics = log_metrics
         self.plot_event = plot_event

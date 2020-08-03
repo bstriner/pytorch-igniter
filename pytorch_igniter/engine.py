@@ -56,6 +56,7 @@ def build_engine(
             handler=print_logs,
             trainer=trainer,
             fmt=spec.print_fmt,
+            metric_fmt=spec.print_metric_fmt,
             metric_names=spec.print_metrics)
 
     # Save logs
