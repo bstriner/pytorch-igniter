@@ -189,7 +189,7 @@ def get_last_checkpoint(checkpoint_handler: ModelCheckpoint):
     else:
         ext = "pt"
     if not ext.startswith("."):
-        ext = ".{}".format(ext)
+        ext = "\\.{}".format(ext)
     fmt = "{}checkpoint_(\\d+){}".format(filename_prefix, ext)
 
     def parse(fn):

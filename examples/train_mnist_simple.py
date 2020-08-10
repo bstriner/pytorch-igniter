@@ -19,7 +19,7 @@ import torchvision.transforms as transforms
 import torchvision.utils as vutils
 from torch.autograd import backward
 
-from pytorch_igniter import train, get_value, RunSpec, tensors_to_device
+from pytorch_igniter import train, get_value, RunSpec, tensors_to_device, standard_train_args
 
 # Define a model
 
@@ -86,34 +86,21 @@ def train_mnist_simple(dataroot='data', batch_size=32, workers=2, device='cpu', 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataroot", help="path to dataset", default='data')
-    parser.add_argument("--workers", type=int, default=2,
-                        help="number of data loading workers")
-    parser.add_argument("--batch-size", type=int,
-                        default=32, help="input batch size")
-    parser.add_argument("--max-epochs", type=int, default=25,
-                        help="number of epochs to train for")
-    parser.add_argument("--learning-rate", type=float, default=0.0003,
-                        help="learning rate")
-    parser.add_argument("--no-cuda", action="store_true", help="disables cuda")
-    parser.add_argument("--output-dir", default='output/mnist/simple',
-                        help="directory to output images and model checkpoints")
+    standard_train_args(
+        parser=parser,
+        output_dir='output/mnist/simple/output',
+        model_dir='output/mnist/simple/model',
+        channels={
+            'data': 'data'
+        }
+    )
     args = parser.parse_args()
     return args
 
 
 def main():
     args = parse_args()
-    device = "cpu" if (not torch.cuda.is_available()
-                       or args.no_cuda) else "cuda:0"
-    train_mnist_simple(
-        dataroot=args.dataroot,
-        batch_size=args.batch_size,
-        workers=args.workers,
-        output_dir=args.output_dir,
-        device=device,
-        max_epochs=args.max_epochs
-    )
+    train_mnist_simple(args=args)
 
 
 if __name__ == "__main__":
