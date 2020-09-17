@@ -6,7 +6,8 @@ setup(name='pytorch-igniter',
       url='https://github.com/bstriner/pytorch-igniter',
       install_requires=[
           'pytorch-ignite',
-          'pyyaml'
+          'pyyaml',
+          'tqdm'
       ],
       extras_require={
           "mlflow":  ["mlflow"],
