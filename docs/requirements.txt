@@ -6,3 +6,4 @@ sagemaker
 tqdm
 torch
 torchvision
+sphinx_rtd_theme
