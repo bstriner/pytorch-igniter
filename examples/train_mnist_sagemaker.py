@@ -14,7 +14,7 @@ from ignite.engine import Engine, Events
 from ignite.handlers import ModelCheckpoint, Timer
 from ignite.metrics import RunningAverage, Average
 
-import torchvision.datasets as dset
+from torchvision.datasets import MNIST
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
 from torch.autograd import backward
@@ -28,10 +28,10 @@ def train_mnist_classifier(
 ):
 
     # Create data loaders
-    train_loader = data.DataLoader(dset.MNIST(root=args.data, download=True, train=True,
+    train_loader = data.DataLoader(MNIST(root=args.data, download=True, train=True,
                                               transform=transforms.ToTensor()), batch_size=args.batch_size,
                                    shuffle=True, num_workers=args.workers, drop_last=False)
-    eval_loader = data.DataLoader(dset.MNIST(root=args.data, download=True, train=False,
+    eval_loader = data.DataLoader(MNIST(root=args.data, download=True, train=False,
                                              transform=transforms.ToTensor()), batch_size=args.batch_size,
                                   shuffle=True, num_workers=args.workers, drop_last=False)
 

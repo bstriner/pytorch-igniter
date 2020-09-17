@@ -43,6 +43,9 @@ def train(
     mlflow_tracking_uri=None,
     parameters=None
 ):
+    """
+    Train a model
+    """
     if mlflow_tracking_uri is not None:
         mlflow.set_tracking_uri(mlflow_tracking_uri)
     ctx, output_dir = mlflow_ctx(

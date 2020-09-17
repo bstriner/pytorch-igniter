@@ -234,12 +234,8 @@ def image_saver(engine, output_path, fn):
 
 def image_saver_callback(output_path, images):
     """
-    Add a callback to 
+    Add a callback to save images
 
-    spec(
-        callback=image_saver_callback('images',{'generated':get_value('generated')}),
-        ...
-    )
     """
     def fn(engine):
         for key, value in images.items():

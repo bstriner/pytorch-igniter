@@ -20,6 +20,12 @@ def bool_argument(
     parser.add_argument(*args, **kwargs, type=strtobool, const=True, nargs="?")
 
 
+def train_args_sagemaker(parser: argparse.ArgumentParser):
+    bool_argument(
+        parser, '--sagemaker-run'
+    )
+    pass
+
 def train_args_export_model(parser: argparse.ArgumentParser,
                             model_dir='model',
                             export_model=True
