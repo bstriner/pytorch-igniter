@@ -4,3 +4,5 @@ pyyaml
 mlflow
 sagemaker
 tqdm
+torch
+torchvision
