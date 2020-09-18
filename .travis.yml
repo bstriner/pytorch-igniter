@@ -1,14 +1,15 @@
 language: python
 python:
-  - "3.7"
-# command to install dependencies
+- '3.7'
 install:
-  - pip install -r requirements.txt
-  - pip install .
-# command to run tests
+- pip install -r requirements.txt
+- pip install .
 script:
-  - pytest
-#deploy:
-#  provider: pypi
-#  username: "__token__"
-#  distributions: "sdist bdist_wheel"
+- pytest
+deploy:
+  provider: pypi
+  username: "__token__"
+  on:
+    tags: true
+  password:
+    secure: dMLpXNZxIPaV0mIXQHNxQVI9eif/tzY3ZNLWX4WvbzHFZPuYZJz6hwqp+zX09l8a/LiEc3EqdLEMjTlHhK0PE5j9zXHtl3lf1SZj78gRSpAZriw2QvdwPo5TjKrNM1VpPfCn3IPp0YCOuaZia1tsCN5s2wWJmTcNkzsnrMml2c1Yn4/Im2hkm9tPLD8mxU6HUSP8SYq45zwgsXtM3J4iPTtqgUrP2AcMfVPy4zlFYusWNsXAKTINP+I0uPE9sFeSRNknAFHISos5z2XQ/6dSmS7HTeWEgz7plMI6J82R50COylygSzlRFTUaW1l/FCa89EBcrJmgtTfEqlrCZPeD9cUPlS48bDMpLoZ99H3SyeOgODjTLTpAPisgdTSvdWIeP3aNikHOC2zKp8SPcAe5ebKvpDa3Yc+ZcrBKa+0WePAjwuE5NNx3uAj9RoFA8tCxHsQXq7ERsfZWveQqN+WWx8nh0d/cD1shdO5MF/P+Pwggfu3q44ZQg6eblTMF6KbghlZi579rwIDMK0qa1JGC4bdDYx1xQZJYtT30w9fEydoq67tHT3GwovyiPIR9PQLKKqro4qh7HetF5rcRDPaBlB7zWgsvpHZh0mT+u/Ldivp+AqPnPmDo6sp6i5kcKn/Vj0rjD2UUxcv7DtwHGcI/CqlLxXfNil89ndFkQ/b1BC8=
