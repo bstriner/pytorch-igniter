@@ -9,6 +9,7 @@ script:
 deploy:
   provider: pypi
   username: "__token__"
+  distributions: sdist bdist_wheel
   on:
     tags: true
   password:
