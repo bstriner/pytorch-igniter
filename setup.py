@@ -1,7 +1,9 @@
 from setuptools import find_packages, setup
-
+import os
+with open(os.path.abspath(os.path.join(__file__, '../README.rst')), encoding='utf-8') as f:
+    long_description = f.read()
 setup(name='pytorch-igniter',
-      version='0.0.10',
+      version='0.0.11',
       author='Ben Striner',
       author_email="bstriner@gmail.com",
       url='https://github.com/bstriner/pytorch-igniter',
@@ -15,4 +17,6 @@ setup(name='pytorch-igniter',
           "mlflow":  ["mlflow"],
           "sagemaker": ["sagemaker"],
       },
-      packages=find_packages())
+      packages=find_packages(),
+      long_description=long_description,
+      long_description_content_type='text/x-rst')
