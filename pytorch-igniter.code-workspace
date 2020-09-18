@@ -4,5 +4,9 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"python.pythonPath": "c:\\Projects\\venv\\Scripts\\python.exe",
+		"restructuredtext.builtDocumentationPath": "/Projects/pytorch-igniter/docs/build/html",
+		"restructuredtext.confPath":"c:\\Projects\\pytorch-igniter\\docs\\source",
+	}
 }
