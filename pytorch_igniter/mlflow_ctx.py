@@ -54,14 +54,18 @@ def mlflow_ctx(
         if allow_new:
             print("MLflow new run")
             if experiment_name:
-                experiment = mlflow.get_experiment_by_name(
-                    name=experiment_name)
-                if experiment:
-                    experiment_id = experiment.experiment_id
-                else:
-                    experiment_id = mlflow.create_experiment(
+                try:
+                    experiment = mlflow.get_experiment_by_name(
                         name=experiment_name)
-                    #todo: wait for experiment to be fully created. otherwise start_run fails
+                    if experiment:
+                        experiment_id = experiment.experiment_id
+                    else:
+                        experiment_id = mlflow.create_experiment(
+                            name=experiment_name)
+                        #todo: wait for experiment to be fully created. otherwise start_run fails
+                except Exception as e:
+                    print(e)
+                    experiment_id = None
             else:
                 experiment_id = None
             ctx = mlflow.start_run(
