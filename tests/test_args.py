@@ -1,9 +1,9 @@
-from pytorch_igniter.args import train_args_standard
+from pytorch_igniter.args import train_args
 import argparse
 
 
 def test_standard_args():
     parser = argparse.ArgumentParser()
-    train_args_standard(parser=parser, output_dir='testoutputdir')
+    train_args(parser=parser, batch_size=123)
     args = parser.parse_args()
-    assert args.output_dir == 'testoutputdir'
+    assert args.batch_size == 123
