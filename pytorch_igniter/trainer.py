@@ -33,23 +33,32 @@ COMPLETE = "Training complete"
 
 def train(
     to_save,
-    output_dir,
     train_spec: RunSpec,
     eval_spec: RunSpec,
     eval_event=Events.EPOCH_COMPLETED,
     save_event=Events.EPOCH_COMPLETED,
     n_saved=10,
+    output_dir=None,
     mlflow_enable=True,
     mlflow_tracking_uri=None,
-    parameters=None
+    mlflow_experiment_name=None,
+    mlflow_run_name=None,
+    model_dir=None,
+    parameters=None,
+    device=None,
+    max_epochs=None
 ):
     """
     Train a model
     """
+    if max_epochs:
+        train_spec.max_epochs = max_epochs
     if mlflow_tracking_uri is not None:
         mlflow.set_tracking_uri(mlflow_tracking_uri)
     ctx, output_dir = mlflow_ctx(
-        output_dir=output_dir, mlflow_enable=mlflow_enable)
+        output_dir=output_dir, mlflow_enable=mlflow_enable,
+        experiment_name=mlflow_experiment_name, run_name=mlflow_run_name,
+        parameters=parameters)
     os.makedirs(output_dir, exist_ok=True)
     with ctx:
         mlflow_logger = get_mlflow_logger(
@@ -61,7 +70,8 @@ def train(
             spec=train_spec,
             output_dir=output_dir,
             mlflow_logger=mlflow_logger,
-            tag='train'
+            tag='train',
+            device=device
         )
         to_save = {'trainer': trainer, **to_save}
 
@@ -91,7 +101,8 @@ def train(
                         tag=tag,
                         trainer=trainer,
                         metric_cls=SafeAverage,
-                        is_training=False
+                        is_training=False,
+                        device=device
                     ),
                     spec
                 )
@@ -148,4 +159,10 @@ def train(
                     train_spec.loader,
                     max_epochs=train_spec.max_epochs,
                     epoch_length=train_spec.epoch_length)
+    if model_dir:
+        os.makedirs(model_dir, exist_ok=True)
+        torch.save(
+            {k: v.state_dict() for k, v in to_save.items()},
+            os.path.join(model_dir, 'model.pt')
+        )
     return get_metrics(engine=trainer)

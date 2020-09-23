@@ -11,6 +11,7 @@ Welcome to pytorch-igniter's documentation!
    :caption: Contents:
 
    README <readme>
+   training
    modules
 
 

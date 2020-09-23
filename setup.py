@@ -11,12 +11,10 @@ setup(name='pytorch-igniter',
       install_requires=[
           'pytorch-ignite',
           'pyyaml',
-          'tqdm'
+          'tqdm',
+          'mlflow',
+          'aws-sagemaker-remote'
       ],
-      extras_require={
-          "mlflow":  ["mlflow"],
-          "sagemaker": ["sagemaker"],
-      },
       packages=find_packages(),
       long_description=long_description,
       long_description_content_type='text/x-rst')

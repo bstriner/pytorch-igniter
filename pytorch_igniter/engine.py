@@ -3,7 +3,7 @@ from .spec import RunSpec
 import os
 from ignite.metrics import RunningAverage
 from ignite.engine import Engine, Events
-from .util import chain_callbacks, auto_metric, timer_metric, print_logs, save_logs, create_plots
+from .util import chain_callbacks, auto_metric, timer_metric, print_logs, save_logs, create_plots, tensors_to_device
 from ignite.contrib.handlers import ProgressBar
 from ignite.contrib.handlers.mlflow_logger import OutputHandler, global_step_from_engine
 LOGS_FNAME = "logs.tsv"
@@ -17,7 +17,8 @@ def build_engine(
     metric_cls=RunningAverage,
     tag="",
     mlflow_logger=None,
-    is_training=None
+    is_training=None,
+    device=None
 ):
     if spec.plot_event is not None or spec.log_event is not None:
         assert output_dir is not None
@@ -27,7 +28,15 @@ def build_engine(
         plot_fname = None
         logs_fname = None
     # Create engine
-    engine = Engine(spec.step)
+    if device:
+        to_device = tensors_to_device(device=device)
+
+        def step(engine, batch):
+            batch = to_device(batch)
+            return spec.step(engine, batch)
+    else:
+        step = spec.step
+    engine = Engine(step)
     if trainer is None:
         # training
         trainer = engine

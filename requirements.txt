@@ -5,3 +5,4 @@ mlflow
 sagemaker
 torch
 torchvision
+aws-sagemaker-remote

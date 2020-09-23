@@ -4,19 +4,26 @@ import contextlib
 from ignite.contrib.handlers.mlflow_logger import MLflowLogger
 import yaml
 
+
 class NullContext(object):
     def __enter__(self):
         pass
-    def __exit__ (self, type, value, tb):
+
+    def __exit__(self, type, value, tb):
         pass
 
+
 RUN_FNAME = 'run.yaml'
+
 
 def mlflow_ctx(
     output_dir=None,
     run_id=None,
     mlflow_enable=True,
-    allow_new=True
+    allow_new=True,
+    experiment_name=None,
+    run_name=None,
+    parameters=None
 ):
     if mlflow_enable:
         # Check for a run already in progress
@@ -46,11 +53,26 @@ def mlflow_ctx(
         # New run
         if allow_new:
             print("MLflow new run")
-            return mlflow.start_run(run_id=run_id), output_dir
+            if experiment_name:
+                experiment = mlflow.get_experiment_by_name(
+                    name=experiment_name)
+                if experiment:
+                    experiment_id = experiment.experiment_id
+                else:
+                    experiment_id = mlflow.create_experiment(
+                        name=experiment_name)
+            else:
+                experiment_id = None
+            ctx = mlflow.start_run(
+                run_id=run_id, experiment_id=experiment_id, run_name=run_name)
+            if parameters:
+                mlflow.log_params(parameters)
+            return ctx, output_dir
         else:
             raise ValueError("No existing MLflow run found")
     else:
-        return  NullContext(), output_dir
+        return NullContext(), output_dir
+
 
 def get_mlflow_logger(output_dir, mlflow_enable):
     if mlflow_enable:

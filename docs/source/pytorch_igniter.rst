@@ -52,6 +52,14 @@ pytorch\_igniter.hooks module
    :undoc-members:
    :show-inheritance:
 
+pytorch\_igniter.main module
+----------------------------
+
+.. automodule:: pytorch_igniter.main
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pytorch\_igniter.metrics module
 -------------------------------
 
@@ -64,14 +72,6 @@ pytorch\_igniter.mlflow\_ctx module
 -----------------------------------
 
 .. automodule:: pytorch_igniter.mlflow_ctx
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pytorch\_igniter.sagemaker module
----------------------------------
-
-.. automodule:: pytorch_igniter.sagemaker
    :members:
    :undoc-members:
    :show-inheritance:

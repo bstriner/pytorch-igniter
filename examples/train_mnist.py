@@ -20,19 +20,20 @@ import torchvision.utils as vutils
 from torch.autograd import backward
 from pytorch_igniter.demo.mnist_model import MnistModel
 from pytorch_igniter import train, get_value, RunSpec
-from pytorch_igniter.args import train_args_standard
+from pytorch_igniter.args import train_kwargs
+from pytorch_igniter.main import igniter_main
 
 
-def train_mnist_classifier(
+def main(
     args
 ):
 
     # Create data loaders
     train_loader = data.DataLoader(MNIST(root=args.data, download=True, train=True,
-                                              transform=transforms.ToTensor()), batch_size=args.batch_size,
+                                         transform=transforms.ToTensor()), batch_size=args.batch_size,
                                    shuffle=True, num_workers=args.workers, drop_last=False)
     eval_loader = data.DataLoader(MNIST(root=args.data, download=True, train=False,
-                                             transform=transforms.ToTensor()), batch_size=args.batch_size,
+                                        transform=transforms.ToTensor()), batch_size=args.test_batch_size,
                                   shuffle=True, num_workers=args.workers, drop_last=False)
 
     # Create model, optimizer, and criteria
@@ -46,21 +47,18 @@ def train_mnist_classifier(
         # Put model into correct mode
         model.train()
         model.zero_grad()
-        # Move batch to device
         pixels, labels = batch
-        pixels, labels = pixels.to(args.device), labels.to(args.device)
         # Run model
         logits = model(pixels)
         # Run loss
-        loss = criteria(input=logits, target=labels)
+        loss = torch.mean(criteria(input=logits, target=labels))
         # Calculate accuracy
-        accuracy = torch.eq(torch.argmax(logits, dim=-1), labels).float()
-        # Results must be scalar for RunningAverage
-        loss = torch.mean(loss)
-        accuracy = torch.mean(accuracy)
+        accuracy = torch.mean(
+            torch.eq(torch.argmax(logits, dim=-1), labels).float())
         # Train model
         loss.backward()
         optimizer.step()
+        # Outputs should be scalars during training
         return {
             "loss": loss,
             "accuracy": accuracy
@@ -70,21 +68,17 @@ def train_mnist_classifier(
     def eval_step(engine, batch):
         # Put model into correct mode
         model.eval()
-        # Move batch to device
         pixels, labels = batch
-        pixels, labels = pixels.to(args.device), labels.to(args.device)
         # Run model
         logits = model(pixels)
         # Run loss
         loss = criteria(input=logits, target=labels)
         # Calculate accuracy
         accuracy = torch.eq(torch.argmax(logits, dim=-1), labels).float()
-        # Results must be shaped (n, 1) for Average to know the batch size
-        loss = loss.view(-1, 1)
-        accuracy = accuracy.view(-1, 1)
+        # Outputs should be shaped (n, 1) during evaluation
         return {
-            "loss": loss,
-            "accuracy": accuracy
+            "loss": loss.view(-1, 1),
+            "accuracy": accuracy.view(-1, 1)
         }
 
     # Metrics average the outputs of the step functions and are printed and saved to logs
@@ -104,37 +98,35 @@ def train_mnist_classifier(
         train_spec=RunSpec(
             step=train_step,
             loader=train_loader,
-            metrics=metrics,
-            max_epochs=args.max_epochs
+            metrics=metrics
         ),
         eval_spec=RunSpec(
             step=eval_step,
             loader=eval_loader,
             metrics=metrics
         ),
-        #parameters=parameters,
-        output_dir=args.output_dir
+        **train_kwargs(args),
+        parameters=vars(args)
     )
-
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    train_args_standard(
-        parser=parser,
-        output_dir='output/mnist/advanced/output',
-        max_epochs=10,
-        channels={
-            'data': os.path.abspath(os.path.join(__file__,'../data'))
-        }
-    )
-    args = parser.parse_args()
-    return args
-
-
-def main():
-    args = parse_args()
-    train_mnist_classifier(args)
 
 
 if __name__ == "__main__":
-    main()
+    igniter_main(
+        main=main,
+        training_args={
+            'max_epochs': 5,  # change default epochs (optional)
+            # experiment name in MLflow (optional)
+            'mlflow_experiment_name': 'mnist-demo'
+        },
+        inputs={
+            'data': os.path.abspath(os.path.join(__file__, '../../output/mnist/data'))
+        },
+        # change default output path (optional)
+        output_dir='output/mnist/output',
+        # change default model export path (optional)
+        model_dir='output/mnist/model',
+        # experiment name in SageMaker (optional)
+        experiment_name='mnist-demo',
+        # argparse description (optional)
+        description='Demo script for MNIST training'
+    )
