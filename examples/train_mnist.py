@@ -4,6 +4,10 @@ import random
 import warnings
 import numpy as np
 
+import pprint
+print("Environment")
+pprint.pprint(os.environ)
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
