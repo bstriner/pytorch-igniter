@@ -114,7 +114,7 @@ Basic Usage
         )
 
 Command-Line Arguments
-----------------------
+++++++++++++++++++++++
 
 Note that additional command-line arguments are generated for each item in ``inputs`` and ``dependencies`` function arguments.
 
@@ -122,3 +122,5 @@ Note that additional command-line arguments are generated for each item in ``inp
    :module: pytorch_igniter.args
    :func: parser_for_docs
    :prog: pytorch-igniter
+
+See ``aws-sagemaker-remote`` documentation for SageMaker option documentation.

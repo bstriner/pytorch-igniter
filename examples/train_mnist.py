@@ -7,7 +7,12 @@ import numpy as np
 import pprint
 print("Environment")
 pprint.pprint(os.environ)
+print("Connection check")
+import requests
 
+x = requests.get('https://w3schools.com/python/demopage.htm')
+
+print(x.text)
 import torch
 import torch.nn as nn
 import torch.optim as optim

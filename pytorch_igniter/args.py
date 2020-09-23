@@ -83,7 +83,7 @@ def train_args(
         parser.add_argument('--mlflow-tracking-uri', default=mlflow_tracking_uri,
                             help='URI of MLflow tracking server (default: ``{}``)'.format(mlflow_tracking_uri))
     if arguments == 'all' or 'n_saved' in arguments:
-        parser.add_argument('--n-saved', default=n_saved,
+        parser.add_argument('--n-saved', default=n_saved, type=int,
                             help='Number of checkpoints to keep (default: ``{}``)'.format(n_saved))
     if arguments == 'all' or 'device' in arguments:
         if device is None:

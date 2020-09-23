@@ -62,10 +62,12 @@ def mlflow_ctx(
                     else:
                         experiment_id = mlflow.create_experiment(
                             name=experiment_name)
-                        #todo: wait for experiment to be fully created. otherwise start_run fails
                 except Exception as e:
                     print(e)
-                    experiment_id = None
+                    experiment_id = mlflow.create_experiment(
+                            name=experiment_name)
+                    
+                #todo: wait for experiment to be fully created. otherwise start_run fails
             else:
                 experiment_id = None
             ctx = mlflow.start_run(
