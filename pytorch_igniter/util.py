@@ -139,7 +139,7 @@ def kill_signals():
 
 
 @contextmanager
-def capture_signals(signals=None, callback=None, **kwargs):
+def capture_signals(signals=None, callback=None,die=False, **kwargs):
     if signals is None:
         signals = kill_signals()
     original_handlers = [signal.getsignal(sig) for sig in signals]
@@ -153,6 +153,10 @@ def capture_signals(signals=None, callback=None, **kwargs):
         signal.signal(sig, handle_signal)
     try:
         yield
+    except KeyboardInterrupt as e:
+        print(e)
+        if die:
+            raise e
     finally:
         # note: only works if old handler was originally installed by Python
         for sig, original_handler in zip(signals, original_handlers):
@@ -291,3 +295,10 @@ def timer_metric(engine, name='timer'):
         event_name=Events.ITERATION_COMPLETED,
         handler=handler
     )
+
+
+if __name__=='__main__':
+    with capture_signals():
+        import time
+        time.sleep(200)
+    print("Done")

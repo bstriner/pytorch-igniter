@@ -44,6 +44,7 @@ def train(
     mlflow_experiment_name=None,
     mlflow_run_name=None,
     model_dir=None,
+    checkpoint_dir=None,
     parameters=None,
     device=None,
     max_epochs=None
@@ -60,6 +61,8 @@ def train(
         experiment_name=mlflow_experiment_name, run_name=mlflow_run_name,
         parameters=parameters)
     os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(model_dir, exist_ok=True)
+    os.makedirs(checkpoint_dir, exist_ok=True)
     with ctx:
         mlflow_logger = get_mlflow_logger(
             output_dir=output_dir,
@@ -77,7 +80,7 @@ def train(
 
         # Saver
         checkpoint_handler = ModelCheckpoint(
-            output_dir, filename_prefix="", n_saved=n_saved, require_empty=False)
+            checkpoint_dir, filename_prefix="", n_saved=n_saved, require_empty=False)
         trainer.add_event_handler(
             event_name=save_event,
             handler=checkpoint_handler,
@@ -136,10 +139,7 @@ def train(
 
         # Get last checkpoint
         checkpoint_file, _ = get_last_checkpoint(checkpoint_handler)
-        with capture_signals(
-                callback=checkpoint_handler,
-                engine=trainer,
-                to_save=to_save):
+        with capture_signals():
             if checkpoint_file:
                 # Load checkpoint
                 checkpoint_data = torch.load(checkpoint_file)
@@ -159,10 +159,11 @@ def train(
                     train_spec.loader,
                     max_epochs=train_spec.max_epochs,
                     epoch_length=train_spec.epoch_length)
-    if model_dir:
-        os.makedirs(model_dir, exist_ok=True)
-        torch.save(
-            {k: v.state_dict() for k, v in to_save.items()},
-            os.path.join(model_dir, 'model.pt')
-        )
-    return get_metrics(engine=trainer)
+        checkpoint_handler(engine=trainer, to_save=to_save)
+        if model_dir:
+            os.makedirs(model_dir, exist_ok=True)
+            torch.save(
+                {k: v.state_dict() for k, v in to_save.items()},
+                os.path.join(model_dir, 'model.pt')
+            )
+        return get_metrics(engine=trainer)
