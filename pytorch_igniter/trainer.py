@@ -38,13 +38,13 @@ def train(
     eval_event=Events.EPOCH_COMPLETED,
     save_event=Events.EPOCH_COMPLETED,
     n_saved=10,
-    output_dir=None,
     mlflow_enable=True,
     mlflow_tracking_uri=None,
     mlflow_experiment_name=None,
     mlflow_run_name=None,
-    model_dir=None,
-    checkpoint_dir=None,
+    model_dir='output',
+    checkpoint_dir='output',
+    output_dir='output',
     parameters=None,
     device=None,
     max_epochs=None
@@ -56,8 +56,14 @@ def train(
         train_spec.max_epochs = max_epochs
     if mlflow_tracking_uri is not None:
         mlflow.set_tracking_uri(mlflow_tracking_uri)
-    ctx, output_dir = mlflow_ctx(
-        output_dir=output_dir, mlflow_enable=mlflow_enable,
+    if 'MLFLOW_RUN_ID' in os.environ:
+        run_id = os.environ['MLFLOW_RUN_ID']
+        output_dir = os.path.join(output_dir, run_id)
+        model_dir = os.path.join(model_dir, run_id)
+        checkpoint_dir = os.path.join(checkpoint_dir, run_id)
+
+    ctx = mlflow_ctx(
+        output_dir=output_dir,checkpoint_dir=checkpoint_dir, mlflow_enable=mlflow_enable,
         experiment_name=mlflow_experiment_name, run_name=mlflow_run_name,
         parameters=parameters)
     os.makedirs(output_dir, exist_ok=True)
@@ -66,6 +72,7 @@ def train(
     with ctx:
         mlflow_logger = get_mlflow_logger(
             output_dir=output_dir,
+            checkpoint_dir=checkpoint_dir,
             mlflow_enable=mlflow_enable
         )
         # Create trainer

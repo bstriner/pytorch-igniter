@@ -154,7 +154,7 @@ def capture_signals(signals=None, callback=None,die=False, **kwargs):
     try:
         yield
     except KeyboardInterrupt as e:
-        print(e)
+        tqdm.write(e)
         if die:
             raise e
     finally:

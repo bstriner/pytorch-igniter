@@ -8,6 +8,7 @@ TRAIN_KWARGS = [
     'n_saved',
     'output_dir',
     'model_dir',
+    'checkpoint_dir',
     'mlflow_enable',
     'mlflow_tracking_uri',
     'device',

@@ -125,6 +125,8 @@ if __name__ == "__main__":
         output_dir='output/mnist/output',
         # change default model export path (optional)
         model_dir='output/mnist/model',
+        # change default model checkpoint path (optional)
+        checkpoint_dir='output/mnist/checkpoint',
         # experiment name in SageMaker (optional)
         experiment_name='mnist-demo',
         # argparse description (optional)
