@@ -3,7 +3,7 @@ import os
 with open(os.path.abspath(os.path.join(__file__, '../README.rst')), encoding='utf-8') as f:
     long_description = f.read()
 setup(name='pytorch-igniter',
-      version='0.0.22',
+      version='0.0.23',
       author='Ben Striner',
       author_email="bstriner@gmail.com",
       url='https://github.com/bstriner/pytorch-igniter',
@@ -13,7 +13,7 @@ setup(name='pytorch-igniter',
           'pyyaml',
           'tqdm',
           'mlflow',
-          'aws-sagemaker-remote==0.0.20'
+          'aws-sagemaker-remote'
       ],
       packages=find_packages(),
       long_description=long_description,

@@ -132,3 +132,5 @@ if __name__ == "__main__":
         # argparse description (optional)
         description='Demo script for MNIST training'
     )
+
+# python examples/train_mnist.py --sagemaker-run yes --sagemaker-spot-instances yes --mlflow-tracking-uri ...
