@@ -88,9 +88,16 @@ def train(
         # Saver
         checkpoint_handler = ModelCheckpoint(
             checkpoint_dir, filename_prefix="", n_saved=n_saved, require_empty=False)
+        def safe_checkpoint_handler(engine, to_save):
+            if engine.state.iteration and engine.state.iteration > 0:
+                _, last_iteration = get_last_checkpoint(
+                    checkpoint_handler=checkpoint_handler)
+                if last_iteration is None or last_iteration < engine.state.iteration:
+                    checkpoint_handler(engine=engine, to_save=to_save)
+
         trainer.add_event_handler(
             event_name=save_event,
-            handler=checkpoint_handler,
+            handler=safe_checkpoint_handler,
             to_save=to_save
         )
 
@@ -130,14 +137,11 @@ def train(
                 event_name=eval_event,
                 handler=evaluation)
 
+
         # Handle ctrl-C or other exceptions
         def exception_callback(engine):
             # Save on exit
-            if engine.state.iteration and engine.state.iteration > 0:
-                _, last_iteration = get_last_checkpoint(
-                    checkpoint_handler=checkpoint_handler)
-                if last_iteration is None or last_iteration < engine.state.iteration:
-                    checkpoint_handler(engine=engine, to_save=to_save)
+            safe_checkpoint_handler(engine=engine, to_save=to_save)
         trainer.add_event_handler(
             event_name=Events.EXCEPTION_RAISED,
             handler=handle_exception,
@@ -166,7 +170,7 @@ def train(
                     train_spec.loader,
                     max_epochs=train_spec.max_epochs,
                     epoch_length=train_spec.epoch_length)
-        checkpoint_handler(engine=trainer, to_save=to_save)
+        safe_checkpoint_handler(engine=trainer, to_save=to_save)
         if model_dir:
             os.makedirs(model_dir, exist_ok=True)
             torch.save(
