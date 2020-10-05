@@ -68,18 +68,18 @@ def train(
         os.environ['MLFLOW_TRACKING_PASSWORD'] = mlflow_tracking_password
     if mlflow_tracking_secret:
         secret = get_secret(profile_name=mlflow_tracking_profile, secret_name=mlflow_tracking_secret)
-        print("Secret: {}".format(secret))
+        #print("Secret: {}".format(secret))
         uri = secret.get('uri', None)
         username = secret.get('username', None)
         password = secret.get('password', None)
         if uri:
-            print("Set uri from secret: [{}]".format(uri))
+            #print("Set uri from secret: [{}]".format(uri))
             mlflow.set_tracking_uri(uri)
         if username:
-            print("Set username from secret")
+            #print("Set username from secret")
             os.environ['MLFLOW_TRACKING_USERNAME'] = username
         if password:
-            print("Set password from secret")
+            #print("Set password from secret")
             os.environ['MLFLOW_TRACKING_PASSWORD'] = password
     if 'MLFLOW_RUN_ID' in os.environ:
         run_id = os.environ['MLFLOW_RUN_ID']
