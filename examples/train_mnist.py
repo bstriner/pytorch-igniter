@@ -27,12 +27,12 @@ from pytorch_igniter.main import igniter_main
 def main(
     args
 ):
-
+    dataroot = args.data
     # Create data loaders
-    train_loader = data.DataLoader(MNIST(root=args.data, download=True, train=True,
+    train_loader = data.DataLoader(MNIST(root=dataroot, download=True, train=True,
                                          transform=transforms.ToTensor()), batch_size=args.batch_size,
                                    shuffle=True, num_workers=args.workers, drop_last=False)
-    eval_loader = data.DataLoader(MNIST(root=args.data, download=True, train=False,
+    eval_loader = data.DataLoader(MNIST(root=dataroot, download=True, train=False,
                                         transform=transforms.ToTensor()), batch_size=args.test_batch_size,
                                   shuffle=True, num_workers=args.workers, drop_last=False)
 
