@@ -14,7 +14,13 @@ TRAIN_KWARGS = [
     'device',
     'max_epochs',
     'mlflow_experiment_name',
-    'mlflow_run_name'
+    'mlflow_run_name',
+    'is_sagemaker',
+    'sagemaker_job_name',
+    'mlflow_tracking_username',
+    'mlflow_tracking_password',
+    'mlflow_tracking_secret',
+    'mlflow_tracking_profile'
 ]
 
 
@@ -31,6 +37,10 @@ def train_args(
     device=None,
     mlflow_enable=True,
     mlflow_tracking_uri=None,
+    mlflow_tracking_password=None,
+    mlflow_tracking_username=None,
+    mlflow_tracking_secret=None,
+    mlflow_tracking_profile=None,
     mlflow_experiment_name='default',
     mlflow_run_name=None,
     arguments='all',
@@ -83,6 +93,18 @@ def train_args(
     if arguments == 'all' or 'mlflow_tracking_uri' in arguments:
         parser.add_argument('--mlflow-tracking-uri', default=mlflow_tracking_uri,
                             help='URI of MLflow tracking server (default: ``{}``)'.format(mlflow_tracking_uri))
+    if arguments == 'all' or 'mlflow_tracking_username' in arguments:
+        parser.add_argument('--mlflow-tracking-username', default=mlflow_tracking_username,type=str,
+                            help='Username for MLflow tracking server (default: ``{}``)'.format(mlflow_tracking_username))
+    if arguments == 'all' or 'mlflow_tracking_password' in arguments:
+        parser.add_argument('--mlflow-tracking-password', default=mlflow_tracking_password,type=str,
+                            help='Password for MLflow tracking server (default: ``{}``)'.format(mlflow_tracking_password))
+    if arguments == 'all' or 'mlflow_tracking_secret' in arguments:
+        parser.add_argument('--mlflow-tracking-secret', default=mlflow_tracking_secret,type=str,
+                            help='Secret for accessing MLflow (default: ``{}``)'.format(mlflow_tracking_secret))
+    if arguments == 'all' or 'mlflow_tracking_profile' in arguments:
+        parser.add_argument('--mlflow-tracking-profile', default=mlflow_tracking_profile,type=str,
+                            help='Profile for accessing secret for accessing MLflow (default: ``{}``)'.format(mlflow_tracking_profile))
     if arguments == 'all' or 'n_saved' in arguments:
         parser.add_argument('--n-saved', default=n_saved, type=int,
                             help='Number of checkpoints to keep (default: ``{}``)'.format(n_saved))

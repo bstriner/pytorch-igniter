@@ -26,7 +26,7 @@ import yaml
 from .spec import RunSpec
 from .engine import build_engine
 from .util import handle_exception, get_last_checkpoint, get_metrics, capture_signals
-
+from .ssm import get_secret
 LOADED = "Loaded {}, epoch {}, iteration {}"
 COMPLETE = "Training complete"
 
@@ -40,6 +40,10 @@ def train(
     n_saved=10,
     mlflow_enable=True,
     mlflow_tracking_uri=None,
+    mlflow_tracking_username=None,
+    mlflow_tracking_password=None,
+    mlflow_tracking_secret=None,
+    mlflow_tracking_profile=None,
     mlflow_experiment_name=None,
     mlflow_run_name=None,
     model_dir='output',
@@ -47,25 +51,46 @@ def train(
     output_dir='output',
     parameters=None,
     device=None,
-    max_epochs=None
+    max_epochs=None,
+    is_sagemaker=False,
+    sagemaker_job_name=None
 ):
     """
     Train a model
     """
     if max_epochs:
         train_spec.max_epochs = max_epochs
-    if mlflow_tracking_uri is not None:
+    if mlflow_tracking_uri:
         mlflow.set_tracking_uri(mlflow_tracking_uri)
+    if mlflow_tracking_username:
+        os.environ['MLFLOW_TRACKING_USERNAME'] = mlflow_tracking_username
+    if mlflow_tracking_password:
+        os.environ['MLFLOW_TRACKING_PASSWORD'] = mlflow_tracking_password
+    if mlflow_tracking_secret:
+        secret = get_secret(profile_name=mlflow_tracking_profile, secret_name=mlflow_tracking_secret)
+        print("Secret: {}".format(secret))
+        uri = secret.get('uri', None)
+        username = secret.get('username', None)
+        password = secret.get('password', None)
+        if uri:
+            print("Set uri from secret: [{}]".format(uri))
+            mlflow.set_tracking_uri(uri)
+        if username:
+            print("Set username from secret")
+            os.environ['MLFLOW_TRACKING_USERNAME'] = username
+        if password:
+            print("Set password from secret")
+            os.environ['MLFLOW_TRACKING_PASSWORD'] = password
     if 'MLFLOW_RUN_ID' in os.environ:
         run_id = os.environ['MLFLOW_RUN_ID']
-        output_dir = os.path.join(output_dir, run_id)
-        model_dir = os.path.join(model_dir, run_id)
-        checkpoint_dir = os.path.join(checkpoint_dir, run_id)
+        #output_dir = os.path.join(output_dir, run_id)
+        #model_dir = os.path.join(model_dir, run_id)
+        #checkpoint_dir = os.path.join(checkpoint_dir, run_id)
 
     ctx = mlflow_ctx(
         output_dir=output_dir,checkpoint_dir=checkpoint_dir, mlflow_enable=mlflow_enable,
         experiment_name=mlflow_experiment_name, run_name=mlflow_run_name,
-        parameters=parameters)
+        parameters=parameters, is_sagemaker=is_sagemaker, sagemaker_job_name=sagemaker_job_name)
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(model_dir, exist_ok=True)
     os.makedirs(checkpoint_dir, exist_ok=True)

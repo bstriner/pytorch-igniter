@@ -24,7 +24,9 @@ def mlflow_ctx(
     allow_new=True,
     experiment_name=None,
     run_name=None,
-    parameters=None
+    parameters=None,
+    is_sagemaker=None,
+    sagemaker_job_name=None
 ):
     if mlflow_enable:
         # Check for a run already in progress
@@ -69,6 +71,8 @@ def mlflow_ctx(
                 run_id=run_id, experiment_id=experiment_id, run_name=run_name)
             if parameters:
                 mlflow.log_params(parameters)
+            if is_sagemaker and sagemaker_job_name:
+                mlflow.set_tag('SageMakerJobName', sagemaker_job_name)
             return ctx
         else:
             raise ValueError("No existing MLflow run found")
