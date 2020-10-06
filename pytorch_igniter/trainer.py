@@ -42,8 +42,9 @@ def train(
     mlflow_tracking_uri=None,
     mlflow_tracking_username=None,
     mlflow_tracking_password=None,
-    mlflow_tracking_secret=None,
-    mlflow_tracking_profile=None,
+    mlflow_tracking_secret_name=None,
+    mlflow_tracking_secret_profile=None,
+    mlflow_tracking_secret_region=None,
     mlflow_experiment_name=None,
     mlflow_run_name=None,
     model_dir='output',
@@ -66,8 +67,11 @@ def train(
         os.environ['MLFLOW_TRACKING_USERNAME'] = mlflow_tracking_username
     if mlflow_tracking_password:
         os.environ['MLFLOW_TRACKING_PASSWORD'] = mlflow_tracking_password
-    if mlflow_tracking_secret:
-        secret = get_secret(profile_name=mlflow_tracking_profile, secret_name=mlflow_tracking_secret)
+    if mlflow_tracking_secret_name:
+        secret = get_secret(
+            profile_name=mlflow_tracking_secret_profile,
+            secret_name=mlflow_tracking_secret_name,
+            region_name=mlflow_tracking_secret_region)
         #print("Secret: {}".format(secret))
         uri = secret.get('uri', None)
         username = secret.get('username', None)
@@ -88,7 +92,7 @@ def train(
         #checkpoint_dir = os.path.join(checkpoint_dir, run_id)
 
     ctx = mlflow_ctx(
-        output_dir=output_dir,checkpoint_dir=checkpoint_dir, mlflow_enable=mlflow_enable,
+        output_dir=output_dir, checkpoint_dir=checkpoint_dir, mlflow_enable=mlflow_enable,
         experiment_name=mlflow_experiment_name, run_name=mlflow_run_name,
         parameters=parameters, is_sagemaker=is_sagemaker, sagemaker_job_name=sagemaker_job_name)
     os.makedirs(output_dir, exist_ok=True)
@@ -113,6 +117,7 @@ def train(
         # Saver
         checkpoint_handler = ModelCheckpoint(
             checkpoint_dir, filename_prefix="", n_saved=n_saved, require_empty=False)
+
         def safe_checkpoint_handler(engine, to_save):
             if engine.state.iteration and engine.state.iteration > 0:
                 _, last_iteration = get_last_checkpoint(
@@ -162,8 +167,8 @@ def train(
                 event_name=eval_event,
                 handler=evaluation)
 
-
         # Handle ctrl-C or other exceptions
+
         def exception_callback(engine):
             # Save on exit
             safe_checkpoint_handler(engine=engine, to_save=to_save)

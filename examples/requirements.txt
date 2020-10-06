@@ -1,1 +1,1 @@
-pytorch-igniter==0.0.26
+pytorch-igniter==0.0.27

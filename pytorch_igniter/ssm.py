@@ -9,15 +9,17 @@ import json
 def get_secret(
         profile_name='default',
         secret_name="mlflow-secret",
-        region_name="us-east-1"):
+        region_name=None):
     from botocore.exceptions import ClientError
     import boto3
     if not profile_name:
         profile_name=None
     session = boto3.Session(profile_name=profile_name)
+    if not region_name:
+        region_name = session.region_name
     client = session.client(
         service_name='secretsmanager',
-        # region_name=region_name
+        region_name=region_name
     )
 
     # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.

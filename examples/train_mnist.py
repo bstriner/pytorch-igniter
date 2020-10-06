@@ -133,4 +133,4 @@ if __name__ == "__main__":
         description='Demo script for MNIST training'
     )
 
-# python examples/train_mnist.py --sagemaker-run yes --sagemaker-spot-instances yes --mlflow-tracking-uri ...
+# python examples\train_mnist.py --sagemaker-run yes --sagemaker-spot-instances yes --mlflow-tracking-secret mlflow-secret --data s3://sagemaker-us-east-1-683880991063/demo-mnist-processor-2020-10-01-23-33-18-625/output/output

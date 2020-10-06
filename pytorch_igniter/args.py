@@ -19,8 +19,9 @@ TRAIN_KWARGS = [
     'sagemaker_job_name',
     'mlflow_tracking_username',
     'mlflow_tracking_password',
-    'mlflow_tracking_secret',
-    'mlflow_tracking_profile'
+    'mlflow_tracking_secret_name',
+    'mlflow_tracking_secret_region',
+    'mlflow_tracking_secret_profile'
 ]
 
 
@@ -39,8 +40,9 @@ def train_args(
     mlflow_tracking_uri=None,
     mlflow_tracking_password=None,
     mlflow_tracking_username=None,
-    mlflow_tracking_secret=None,
-    mlflow_tracking_profile=None,
+    mlflow_tracking_secret_name=None,
+    mlflow_tracking_secret_region=None,
+    mlflow_tracking_secret_profile=None,
     mlflow_experiment_name='default',
     mlflow_run_name=None,
     arguments='all',
@@ -99,12 +101,15 @@ def train_args(
     if arguments == 'all' or 'mlflow_tracking_password' in arguments:
         parser.add_argument('--mlflow-tracking-password', default=mlflow_tracking_password,type=str,
                             help='Password for MLflow tracking server (default: ``{}``)'.format(mlflow_tracking_password))
-    if arguments == 'all' or 'mlflow_tracking_secret' in arguments:
-        parser.add_argument('--mlflow-tracking-secret', default=mlflow_tracking_secret,type=str,
-                            help='Secret for accessing MLflow (default: ``{}``)'.format(mlflow_tracking_secret))
-    if arguments == 'all' or 'mlflow_tracking_profile' in arguments:
-        parser.add_argument('--mlflow-tracking-profile', default=mlflow_tracking_profile,type=str,
-                            help='Profile for accessing secret for accessing MLflow (default: ``{}``)'.format(mlflow_tracking_profile))
+    if arguments == 'all' or 'mlflow_tracking_secret_name' in arguments:
+        parser.add_argument('--mlflow-tracking-secret-name', default=mlflow_tracking_secret_name,type=str,
+                            help='Secret for accessing MLflow (default: ``{}``)'.format(mlflow_tracking_secret_name))
+    if arguments == 'all' or 'mlflow_tracking_secret_profile' in arguments:
+        parser.add_argument('--mlflow-tracking-secret-profile', default=mlflow_tracking_secret_profile,type=str,
+                            help='Profile for accessing secret for accessing MLflow (default: ``{}``)'.format(mlflow_tracking_secret_profile))
+    if arguments == 'all' or 'mlflow_tracking_secret_region' in arguments:
+        parser.add_argument('--mlflow-tracking-secret-region', default=mlflow_tracking_secret_region,type=str,
+                            help='Region for accessing secret for accessing MLflow (default: ``{}``)'.format(mlflow_tracking_secret_region))
     if arguments == 'all' or 'n_saved' in arguments:
         parser.add_argument('--n-saved', default=n_saved, type=int,
                             help='Number of checkpoints to keep (default: ``{}``)'.format(n_saved))
