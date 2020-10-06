@@ -72,7 +72,9 @@ def train(
             profile_name=mlflow_tracking_secret_profile,
             secret_name=mlflow_tracking_secret_name,
             region_name=mlflow_tracking_secret_region)
-        #print("Secret: {}".format(secret))
+        if not secret:
+            raise ValueError("Could not get secret [{}]. Check secret name, region, and role permissions".format(
+                mlflow_tracking_secret_name))
         uri = secret.get('uri', None)
         username = secret.get('username', None)
         password = secret.get('password', None)

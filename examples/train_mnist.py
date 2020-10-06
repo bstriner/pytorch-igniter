@@ -129,6 +129,8 @@ if __name__ == "__main__":
         checkpoint_dir='output/mnist/checkpoint',
         # experiment name in SageMaker (optional)
         experiment_name='mnist-demo',
+        # job name in SageMaker (optional)
+        base_job_name='mnist-demo',
         # argparse description (optional)
         description='Demo script for MNIST training'
     )
