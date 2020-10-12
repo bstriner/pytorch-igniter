@@ -128,7 +128,7 @@ def chain_callbacks(callbacks=None, **kwargs):
                 if callback is not None:
                     callback(**kwargs)
         else:
-            callback(**kwargs)
+            callbacks(**kwargs)
 
 
 def kill_signals():

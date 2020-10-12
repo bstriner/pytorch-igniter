@@ -70,11 +70,7 @@ class TrainCommand(TrainingCommand):
         #to_save['model'] = model
         train(
             to_save=to_save,
-            train_spec=RunSpec(
-                step=trainer.step,
-                loader=trainer.loader,
-                metrics=trainer.metrics
-            ),
+            train_spec=trainer.spec,
             # todo: check kwargs
             **train_kwargs(args),
             parameters=vars(args),
@@ -104,7 +100,7 @@ class TrainCommand(TrainingCommand):
             '--cmd', default=self.cmd, help=argparse.SUPPRESS
         )
 
-    def __init__(self, igniter_config: IgniterConfig, script,cmd='train', **kwargs):
+    def __init__(self, igniter_config: IgniterConfig, script, cmd='train', **kwargs):
         super(TrainCommand, self).__init__(
             help='Train a model',
             main=self.runner,
@@ -116,7 +112,7 @@ class TrainCommand(TrainingCommand):
         self.igniter_config = igniter_config
         self.train_config = None
         self.script = script
-        self.cmd=cmd
+        self.cmd = cmd
 
 
 class EvalCommand(TrainingCommand):
@@ -125,11 +121,7 @@ class EvalCommand(TrainingCommand):
         evaluator = self.igniter_config.make_evaluator(
             args, model)
         evaluate(
-            eval_spec=RunSpec(
-                step=evaluator.step,
-                loader=evaluator.loader,
-                metrics=evaluator.metrics
-            ),
+            eval_spec=evaluator.spec,
             to_load={
                 'model': model
             },
@@ -158,7 +150,7 @@ class EvalCommand(TrainingCommand):
             '--cmd', default=self.cmd, help=argparse.SUPPRESS
         )
 
-    def __init__(self, igniter_config: IgniterConfig, script,cmd='eval', **kwargs):
+    def __init__(self, igniter_config: IgniterConfig, script, cmd='eval', **kwargs):
         super(EvalCommand, self).__init__(
             help='Evaluate a model',
             script=script,
@@ -169,7 +161,7 @@ class EvalCommand(TrainingCommand):
         )
         self.igniter_config = igniter_config
         self.script = script
-        self.cmd=cmd
+        self.cmd = cmd
 
     # def configure(self, parser: argparse.ArgumentParser):
     #    super(EvalCommand, self).configure(parser)
@@ -191,16 +183,8 @@ class TrainAndEvalCommand(TrainingCommand):
         train(
             to_save=to_save,
             model=model,
-            train_spec=RunSpec(
-                step=trainer.step,
-                loader=trainer.loader,
-                metrics=trainer.metrics
-            ),
-            eval_spec=RunSpec(
-                step=evaluator.step,
-                loader=evaluator.loader,
-                metrics=evaluator.metrics
-            ),
+            train_spec=trainer.spec,
+            eval_spec=evaluator.spec,
             # todo: check kwargs
             **train_kwargs(args),
             parameters=vars(args)
@@ -243,7 +227,7 @@ class TrainAndEvalCommand(TrainingCommand):
             },
             **kwargs
         )
-        self.cmd=cmd
+        self.cmd = cmd
         self.igniter_config = igniter_config
         self.script = script
 

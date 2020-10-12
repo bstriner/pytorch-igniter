@@ -1,6 +1,7 @@
 
 from ignite.engine import Events
 from .util import TRAIN_MESSAGE, EVAL_MESSAGE
+from torch import nn
 
 class InferenceSpec(object):
     def __init__(self,
@@ -75,6 +76,7 @@ class RunSpec(object):
             **kwargs
         )
 
+
     def __init__(
         self,
         loader,
@@ -95,6 +97,7 @@ class RunSpec(object):
         plot_metrics='all',
         enable_timer=True
     ):
+        super(RunSpec, self).__init__()
         self.loader = loader
         self.step = step
         self.metrics = metrics
