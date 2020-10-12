@@ -44,6 +44,7 @@ def experiment_cli(
     config: IgniterConfig,
     extra_commands=None,
     description=None,
+    dry_run=False,
     **kwargs
 ):
     # dest='command' todo: variable destination
@@ -59,9 +60,9 @@ def experiment_cli(
         cmd = next(csv.reader([cmd]))
         if cmd:
             argv = cmd + sys.argv[1:]
-
-    run_commands(
+    return run_commands(
         commands=commands,
         description=description,
-        argv=argv
+        argv=argv,
+        dry_run=dry_run
     )
