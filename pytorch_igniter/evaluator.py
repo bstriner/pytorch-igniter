@@ -6,6 +6,7 @@ from .mlflow_ctx import mlflow_ctx, get_mlflow_logger
 from .util import load_from, get_metrics
 from tqdm import tqdm
 import torch
+import mlflow
 
 def dummy_step(engine, batch):
     pass
@@ -13,6 +14,7 @@ def dummy_step(engine, batch):
 def evaluate(
     eval_spec: RunSpec,
     output_dir=None,
+    model_dir=None,
     to_load=None,
     tag='eval',
     mlflow_enable=True,
@@ -21,7 +23,7 @@ def evaluate(
 ):
     if mlflow_tracking_uri is not None:
         mlflow.set_tracking_uri(mlflow_tracking_uri)
-    ctx, output_dir = mlflow_ctx(output_dir=output_dir, mlflow_enable=mlflow_enable, allow_new=False)
+    ctx = mlflow_ctx(output_dir=output_dir, mlflow_enable=mlflow_enable, allow_new=True)
     with ctx:
         if to_load is not None:
             dummy_trainer = Engine(dummy_step)
@@ -29,7 +31,7 @@ def evaluate(
                 'trainer' : dummy_trainer,
                 **to_load
             }
-            path, iteration = load_from(output_dir=output_dir, to_load=to_load)
+            path, iteration = load_from(model_dir=model_dir, to_load=to_load)
             tqdm.write("Loaded epoch {} iteration {} from {}".format(
                 dummy_trainer.state.epoch,
                 dummy_trainer.state.iteration, 

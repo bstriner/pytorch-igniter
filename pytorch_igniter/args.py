@@ -114,8 +114,8 @@ def train_args(
         parser.add_argument('--n-saved', default=n_saved, type=int,
                             help='Number of checkpoints to keep (default: ``{}``)'.format(n_saved))
     if arguments == 'all' or 'device' in arguments:
-        if device is None:
-            device = "cpu" if not torch.cuda.is_available() else "cuda"
+        #if device is None:
+        #    device = "cpu" if not torch.cuda.is_available() else "cuda"
         parser.add_argument("--device", type=str, default=device,
                             help="device to use (default: {})".format(device))
 

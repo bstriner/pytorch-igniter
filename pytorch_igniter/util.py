@@ -163,8 +163,8 @@ def capture_signals(signals=None, callback=None,die=False, **kwargs):
             signal.signal(sig, original_handler)
 
 
-def load_from(output_dir, to_load):
-    path, iteration = find_last_checkpoint(output_dir)
+def load_from(model_dir, to_load):
+    path, iteration = find_last_checkpoint(model_dir)
     if path is None:
         raise FileNotFoundError("No checkpoints found in {}".format(path))
     loaded = torch.load(path)

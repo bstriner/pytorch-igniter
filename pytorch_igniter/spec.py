@@ -2,6 +2,19 @@
 from ignite.engine import Events
 from .util import TRAIN_MESSAGE, EVAL_MESSAGE
 
+class InferenceSpec(object):
+    def __init__(self,
+    inferencer,
+    requirements=None,
+    dependencies=None,
+    input_fn=None,
+    output_fn=None):
+        self.inferencer=inferencer
+        self.requirements=requirements
+        self.dependencies=dependencies or []
+        self.input_fn = input_fn or "from pytorch_igniter.inference.image_input_fn import input_fn"
+        self.output_fn = output_fn or "from pytorch_igniter.inference.json_output_fn import output_fn"
+
 
 class RunSpec(object):
     @classmethod
