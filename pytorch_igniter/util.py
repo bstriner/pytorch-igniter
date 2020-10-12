@@ -166,7 +166,7 @@ def capture_signals(signals=None, callback=None,die=False, **kwargs):
 def load_from(model_dir, to_load):
     path, iteration = find_last_checkpoint(model_dir)
     if path is None:
-        raise FileNotFoundError("No checkpoints found in {}".format(path))
+        raise FileNotFoundError("No checkpoints found in {}".format(model_dir))
     loaded = torch.load(path)
     for k, v in to_load.items():
         v.load_state_dict(loaded[k])
