@@ -10,6 +10,11 @@ Installation
 
   pip install pytorch-igniter
 
+Demo
+------
+
+See `pytorch-igniter-demo <https://pytorch-igniter-demo.readthedocs.io/>`_
+
 Documentation
 -----------------
 

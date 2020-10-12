@@ -61,8 +61,8 @@ def model_args(parser, device=None):
 
 class TrainCommand(TrainingCommand):
     def runner(self, args):
-        model = self.igniter_config.make_model(args)
-        trainer = self.igniter_config.make_trainer(args, model)
+        model = self.igniter_config.make_model(args).to(args.device)
+        trainer = self.igniter_config.make_trainer(args, model).to(args.device)
         to_save = {
             'user_trainer': trainer,
             'model': model
@@ -100,8 +100,11 @@ class TrainCommand(TrainingCommand):
         train_args(group)
         if self.igniter_config.train_args:
             self.igniter_config.train_args(group)
+        parser.add_argument(
+            '--cmd', default=self.cmd, help=argparse.SUPPRESS
+        )
 
-    def __init__(self, igniter_config: IgniterConfig, script, **kwargs):
+    def __init__(self, igniter_config: IgniterConfig, script,cmd='train', **kwargs):
         super(TrainCommand, self).__init__(
             help='Train a model',
             main=self.runner,
@@ -113,11 +116,12 @@ class TrainCommand(TrainingCommand):
         self.igniter_config = igniter_config
         self.train_config = None
         self.script = script
+        self.cmd=cmd
 
 
 class EvalCommand(TrainingCommand):
     def runner(self, args):
-        model = self.igniter_config.make_model(args)
+        model = self.igniter_config.make_model(args).to(args.device)
         evaluator = self.igniter_config.make_evaluator(
             args, model)
         evaluate(
@@ -150,8 +154,11 @@ class EvalCommand(TrainingCommand):
         )
         if self.igniter_config.eval_args:
             self.igniter_config.eval_args(group)
+        parser.add_argument(
+            '--cmd', default=self.cmd, help=argparse.SUPPRESS
+        )
 
-    def __init__(self, igniter_config: IgniterConfig, script, **kwargs):
+    def __init__(self, igniter_config: IgniterConfig, script,cmd='eval', **kwargs):
         super(EvalCommand, self).__init__(
             help='Evaluate a model',
             script=script,
@@ -162,6 +169,7 @@ class EvalCommand(TrainingCommand):
         )
         self.igniter_config = igniter_config
         self.script = script
+        self.cmd=cmd
 
     # def configure(self, parser: argparse.ArgumentParser):
     #    super(EvalCommand, self).configure(parser)
@@ -171,9 +179,9 @@ class EvalCommand(TrainingCommand):
 
 class TrainAndEvalCommand(TrainingCommand):
     def runner(self, args):
-        model = self.igniter_config.make_model(args)
+        model = self.igniter_config.make_model(args).to(args.device)
         trainer = self.igniter_config.make_trainer(
-            args, model)
+            args, model).to(args.device)
         evaluator = self.igniter_config.make_evaluator(
             args, model)
         to_save = {
@@ -219,8 +227,11 @@ class TrainAndEvalCommand(TrainingCommand):
         )
         if self.igniter_config.eval_args:
             self.igniter_config.eval_args(group)
+        parser.add_argument(
+            '--cmd', default=self.cmd, help=argparse.SUPPRESS
+        )
 
-    def __init__(self, igniter_config: IgniterConfig, script, **kwargs):
+    def __init__(self, igniter_config: IgniterConfig, script, cmd='train-and-eval', **kwargs):
         super(TrainAndEvalCommand, self).__init__(
             help='Train and evaluate a model',
             script=script,
@@ -232,6 +243,7 @@ class TrainAndEvalCommand(TrainingCommand):
             },
             **kwargs
         )
+        self.cmd=cmd
         self.igniter_config = igniter_config
         self.script = script
 

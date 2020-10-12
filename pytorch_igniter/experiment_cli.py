@@ -7,6 +7,7 @@ from aws_sagemaker_remote.commands import run_commands
 import sys
 import csv
 import os
+from aws_sagemaker_remote.training.args import sagemaker_env_arg
 
 IGNITER_COMMAND='IGNITER_COMMAND'
 
@@ -54,12 +55,20 @@ def experiment_cli(
         extra_commands=extra_commands,
         **kwargs)
 
+    argv = []
     cmd = os.getenv(IGNITER_COMMAND, None)
-    argv = None
     if cmd:
         cmd = next(csv.reader([cmd]))
         if cmd:
-            argv = cmd + sys.argv[1:]
+            argv.extend(cmd)
+    cmd = sagemaker_env_arg()
+    if cmd:
+        cmd = cmd.get('hyperparameters', {}).get('cmd',None)
+        if cmd:
+            cmd = next(csv.reader([cmd]))
+            if cmd:
+                argv.extend(cmd)
+    argv.extend(sys.argv[1:])
     return run_commands(
         commands=commands,
         description=description,
