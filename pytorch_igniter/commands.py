@@ -187,7 +187,9 @@ class TrainAndEvalCommand(TrainingCommand):
             eval_spec=evaluator.spec,
             # todo: check kwargs
             **train_kwargs(args),
-            parameters=vars(args)
+            parameters=vars(args),
+            inference_args=args,
+            inference_spec=self.igniter_config.inference_spec,
         )
 
     def argparse_callback(self, parser):
