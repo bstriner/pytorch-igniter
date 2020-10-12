@@ -30,8 +30,25 @@ from .spec import RunSpec
 from .engine import build_engine
 from .util import handle_exception, get_last_checkpoint, get_metrics, capture_signals
 from .ssm import get_secret
+import re
 LOADED = "Loaded {}, epoch {}, iteration {}"
 COMPLETE = "Training complete"
+
+# have to monkey patch to work with WSL as workaround for https://bugs.python.org/issue38633
+import errno, shutil
+orig_copyxattr = shutil._copyxattr
+def patched_copyxattr(src, dst, *, follow_symlinks=True):
+	try:
+		orig_copyxattr(src, dst, follow_symlinks=follow_symlinks)
+	except OSError as ex:
+		if ex.errno != errno.EACCES: raise
+shutil._copyxattr = patched_copyxattr
+
+def ignore(path, names):
+    return [
+        name for name in names
+        if re.match("__pycache__|\\.git", name)
+    ]
 
 
 def train(
@@ -231,12 +248,17 @@ def train(
                 os.makedirs(code_dir, exist_ok=True)
                 for dep in inference_spec.dependencies:
                     dep = module_path(dep)
+                    des = os.path.join(
+                            code_dir, os.path.basename(dep)
+                        )
+                    if os.path.exists(des):
+                        shutil.rmtree(des)
                     shutil.copytree(
                         dep,
-                        os.path.join(
-                            code_dir, os.path.basename(dep)
-                        ),
-                        dirs_exist_ok=True)
+                        des,
+                        dirs_exist_ok=True,
+                        ignore=ignore
+                    )
                 if inference_spec.requirements:
                     shutil.copyfile(inference_spec.requirements, os.path.join(
                         code_dir, 'requirements.txt'
@@ -261,9 +283,9 @@ def train(
                         f.write("{}\n".format(inference_spec.output_fn))
                     else:
                         f.write("from {} import {} as output_fn\n".format(
-                        inference_spec.output_fn.__module__,
-                        inference_spec.output_fn.__name__
-                    ))
+                            inference_spec.output_fn.__module__,
+                            inference_spec.output_fn.__name__
+                        ))
                     if isinstance(inference_spec.inferencer, str):
                         f.write("{}\n".format(inference_spec.inferencer))
                     else:

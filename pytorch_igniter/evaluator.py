@@ -52,6 +52,7 @@ def evaluate(
             mlflow_logger=mlflow_logger,
             trainer=trainer
         )
+        print("Metrics: {}".format(eval_spec.metrics))
         evaluator.run(
             eval_spec.loader, max_epochs=eval_spec.max_epochs, epoch_length=eval_spec.epoch_length
         )

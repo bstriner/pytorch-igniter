@@ -99,6 +99,11 @@ class TrainCommand(TrainingCommand):
         parser.add_argument(
             '--cmd', default=self.cmd, help=argparse.SUPPRESS
         )
+        group = parser.add_argument_group(
+            title='MLflow',
+            description='MLflow arguments'
+        )
+        mlflow_args(group)
 
     def __init__(self, igniter_config: IgniterConfig, script, cmd='train', **kwargs):
         super(TrainCommand, self).__init__(
@@ -149,6 +154,11 @@ class EvalCommand(TrainingCommand):
         parser.add_argument(
             '--cmd', default=self.cmd, help=argparse.SUPPRESS
         )
+        group = parser.add_argument_group(
+            title='MLflow',
+            description='MLflow arguments'
+        )
+        mlflow_args(group)
 
     def __init__(self, igniter_config: IgniterConfig, script, cmd='eval', **kwargs):
         super(EvalCommand, self).__init__(
@@ -216,6 +226,11 @@ class TrainAndEvalCommand(TrainingCommand):
         parser.add_argument(
             '--cmd', default=self.cmd, help=argparse.SUPPRESS
         )
+        group = parser.add_argument_group(
+            title='MLflow',
+            description='MLflow arguments'
+        )
+        mlflow_args(group)
 
     def __init__(self, igniter_config: IgniterConfig, script, cmd='train-and-eval', **kwargs):
         super(TrainAndEvalCommand, self).__init__(
