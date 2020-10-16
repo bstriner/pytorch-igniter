@@ -123,7 +123,7 @@ class RunSpec(object):
         if self.metrics is None:
             self.metrics = {}
         if self.plot_event == 'default':
-            self.plot_event = Events.EPOCH_COMPLETED
+            self.plot_event = None #Events.EPOCH_COMPLETED
         if is_training:
             # Log and print every 100 training iterations
             if self.log_event == 'default':
