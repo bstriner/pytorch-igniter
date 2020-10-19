@@ -256,7 +256,7 @@ def train(
                     shutil.copytree(
                         dep,
                         des,
-                        dirs_exist_ok=True,
+                        #dirs_exist_ok=True,
                         ignore=ignore
                     )
                 if inference_spec.requirements:
