@@ -14,6 +14,8 @@ def input_fn(request_body, request_content_type):
         #data = torch.from_numpy(data)
         return fs, data
     elif request_content_type in ['application/json','text/javascript','application/javascript','text/json']:
+        if isinstance(request_body, bytes):
+            request_body = request_body.decode('utf-8')
         info = json.loads(request_body)
         if 's3' in info:
             uri = info['s3']

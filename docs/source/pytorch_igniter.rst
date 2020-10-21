@@ -8,6 +8,7 @@ Subpackages
    :maxdepth: 4
 
    pytorch_igniter.demo
+   pytorch_igniter.inference
 
 Submodules
 ----------
@@ -20,10 +21,18 @@ pytorch\_igniter.args module
    :undoc-members:
    :show-inheritance:
 
-pytorch\_igniter.conf module
-----------------------------
+pytorch\_igniter.commands module
+--------------------------------
 
-.. automodule:: pytorch_igniter.conf
+.. automodule:: pytorch_igniter.commands
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pytorch\_igniter.config module
+------------------------------
+
+.. automodule:: pytorch_igniter.config
    :members:
    :undoc-members:
    :show-inheritance:
@@ -40,6 +49,14 @@ pytorch\_igniter.evaluator module
 ---------------------------------
 
 .. automodule:: pytorch_igniter.evaluator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pytorch\_igniter.experiment\_cli module
+---------------------------------------
+
+.. automodule:: pytorch_igniter.experiment_cli
    :members:
    :undoc-members:
    :show-inheritance:
@@ -80,6 +97,14 @@ pytorch\_igniter.spec module
 ----------------------------
 
 .. automodule:: pytorch_igniter.spec
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pytorch\_igniter.ssm module
+---------------------------
+
+.. automodule:: pytorch_igniter.ssm
    :members:
    :undoc-members:
    :show-inheritance:
