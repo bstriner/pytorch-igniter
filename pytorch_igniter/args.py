@@ -21,13 +21,22 @@ TRAIN_KWARGS = [
     'mlflow_tracking_password',
     'mlflow_tracking_secret_name',
     'mlflow_tracking_secret_region',
-    'mlflow_tracking_secret_profile'
+    'mlflow_tracking_secret_profile',
+    'eval_event',
+    'save_event'
 ]
 
 
 def train_kwargs(args):
     return {k: getattr(args, k) for k in TRAIN_KWARGS if hasattr(args, k)}
 
+def train_and_eval_args(
+    parser: argparse.ArgumentParser,
+    eval_event: 'EPOCH_COMPLETED'
+):
+    parser.add_argument(
+        '--eval-event', default=eval_event, help='Evaluation event'
+    )
 
 def train_args(
     parser: argparse.ArgumentParser,

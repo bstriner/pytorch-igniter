@@ -10,6 +10,7 @@ from .mlflow_ctx import mlflow_ctx, get_mlflow_logger
 import re
 from aws_sagemaker_remote.modules import module_path
 import shutil
+from .events import event_argument
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -82,6 +83,8 @@ def train(
     """
     Train a model
     """
+    save_event = event_argument(save_event)
+    eval_event = event_argument(eval_event)
     if max_epochs:
         train_spec.max_epochs = max_epochs
     if mlflow_tracking_uri:

@@ -43,13 +43,24 @@ def mlflow_args(
                         help='Region for accessing secret for accessing MLflow (default: ``{}``)'.format(mlflow_tracking_secret_region))
 
 
-def train_args(parser, max_epochs=10, n_saved=10):
+def train_and_eval_args(
+    parser: argparse.ArgumentParser,
+    eval_event= 'EPOCH_COMPLETED'
+):
+    parser.add_argument(
+        '--eval-event', default=eval_event, help='Evaluation event'
+    )
+
+def train_args(parser, max_epochs=10, n_saved=10, save_event='EPOCH_COMPLETED'):
     parser.add_argument(
         '--max-epochs', type=int, default=max_epochs, metavar='N',
         help='number of epochs to train (default: {})'.format(max_epochs))
     parser.add_argument(
         '--n-saved', default=n_saved, type=int,
         help='Number of checkpoints to keep (default: ``{}``)'.format(n_saved))
+    parser.add_argument(
+        '--save-event', default=save_event, help='save event'
+    )
     # parser.add_argument('--seed', type=int, default=1, metavar='S',
     #                        help='random seed (default: 1)')
 
@@ -223,6 +234,11 @@ class TrainAndEvalCommand(TrainingCommand):
         )
         if self.igniter_config.eval_args:
             self.igniter_config.eval_args(group)
+        group = parser.add_argument_group(
+            title='Training and Evaluation',
+            description='Training and evaluation arguments'
+        )
+        train_and_eval_args(group)
         parser.add_argument(
             '--cmd', default=self.cmd, help=argparse.SUPPRESS
         )
