@@ -9,6 +9,7 @@ import boto3
 import os
 
 def input_fn(request_body, request_content_type):
+    request_content_type = (request_content_type or "").strip()
     if request_content_type in ['audio/wav', 'audio/wave', 'audio/x-wav']:
         fs, data = wavfile.read(BytesIO(request_body))
         #data = torch.from_numpy(data)
@@ -43,4 +44,4 @@ def input_fn(request_body, request_content_type):
             raise ValueError('JSON requests should include an `s3` or `local` key')  
     else:
         raise ValueError(
-            "Unsupported content type: {}".format(request_content_type))
+            "Unsupported content type: \"{}\"".format(request_content_type))

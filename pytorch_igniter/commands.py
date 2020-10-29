@@ -10,7 +10,17 @@ from aws_sagemaker_remote.training.main import TrainingCommand
 from pytorch_igniter.trainer import train, RunSpec
 from .args import train_kwargs, bool_argument
 from pytorch_igniter.evaluator import evaluate
+import torch
 
+def fix_device(args):    
+    vargs = vars(args)
+    if not vargs.get('device', None):
+        vargs['device'] = "cpu" if not torch.cuda.is_available() else "cuda"
+        print("Detected device=[{}]".format(vargs['device']))
+    else:
+        print("Selected device=[{}]".format(vargs['device']))
+    args = argparse.Namespace(**vargs)
+    return args
 
 def mlflow_args(
         parser,
@@ -72,6 +82,7 @@ def model_args(parser, device=None):
 
 class TrainCommand(TrainingCommand):
     def runner(self, args):
+        args = fix_device(args)
         model = self.igniter_config.make_model(args).to(args.device)
         trainer = self.igniter_config.make_trainer(args, model).to(args.device)
         to_save = {
@@ -133,6 +144,7 @@ class TrainCommand(TrainingCommand):
 
 class EvalCommand(TrainingCommand):
     def runner(self, args):
+        args = fix_device(args)
         model = self.igniter_config.make_model(args).to(args.device)
         evaluator = self.igniter_config.make_evaluator(
             args, model)
@@ -192,6 +204,7 @@ class EvalCommand(TrainingCommand):
 
 class TrainAndEvalCommand(TrainingCommand):
     def runner(self, args):
+        args = fix_device(args)
         model = self.igniter_config.make_model(args).to(args.device)
         trainer = self.igniter_config.make_trainer(
             args, model).to(args.device)

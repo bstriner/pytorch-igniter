@@ -55,7 +55,8 @@ def train_args(
     mlflow_experiment_name='default',
     mlflow_run_name=None,
     arguments='all',
-    n_saved=5
+    n_saved=5,
+    save_event='EPOCH_COMPLETED'
 ):
     r"""
     Configure arguments for training
@@ -127,7 +128,10 @@ def train_args(
         #    device = "cpu" if not torch.cuda.is_available() else "cuda"
         parser.add_argument("--device", type=str, default=device,
                             help="device to use (default: {})".format(device))
-
+    
+    parser.add_argument(
+        '--save-event', default=save_event, help='Save event'
+    )
     """
     parser.add_argument('--hosts', type=list,
                         default=json.loads(os.environ.get('SM_HOSTS', '[]')))

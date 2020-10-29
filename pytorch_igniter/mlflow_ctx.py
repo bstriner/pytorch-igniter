@@ -3,6 +3,7 @@ import mlflow
 import contextlib
 from ignite.contrib.handlers.mlflow_logger import MLflowLogger
 import yaml
+import itertools
 
 
 class NullContext(object):
@@ -62,14 +63,20 @@ def mlflow_ctx(
                 except Exception as e:
                     print(e)
                     experiment_id = mlflow.create_experiment(
-                            name=experiment_name)
-                    
-                #todo: wait for experiment to be fully created. otherwise start_run fails
+                        name=experiment_name)
+
+                # todo: wait for experiment to be fully created. otherwise start_run fails
             else:
                 experiment_id = None
             ctx = mlflow.start_run(
                 run_id=run_id, experiment_id=experiment_id, run_name=run_name)
             if parameters:
+                print("Parameter count: {}".format(len(parameters)))
+                print("Parameters: {}".format(parameters))
+                #todo: workaround
+                parameters = {
+                    k: v for k, v in itertools.islice(parameters.items(), 100)
+                }
                 mlflow.log_params(parameters)
             if is_sagemaker and sagemaker_job_name:
                 mlflow.set_tag('SageMakerJobName', sagemaker_job_name)
