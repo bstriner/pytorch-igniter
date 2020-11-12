@@ -50,7 +50,9 @@ def build_engine(
 
     # Attach metrics
     for name, metric in spec.metrics.items():
-        auto_metric(metric, cls=metric_cls).attach(engine, name)
+        metric = auto_metric(metric, cls=metric_cls)
+        metric.attach(engine, name)
+
     if spec.enable_timer:
         timer_metric(engine=engine)
 
