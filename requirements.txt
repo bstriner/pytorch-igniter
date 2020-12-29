@@ -6,5 +6,5 @@ sagemaker
 torch
 torchvision
 aws-sagemaker-remote
-pandas
-numpy
+pandas==1.2.0
+numpy==1.19.4
