@@ -139,7 +139,7 @@ def kill_signals():
 
 
 @contextmanager
-def capture_signals(signals=None, callback=None,die=False, **kwargs):
+def capture_signals(signals=None, callback=None, die=False, **kwargs):
     if signals is None:
         signals = kill_signals()
     original_handlers = [signal.getsignal(sig) for sig in signals]
@@ -154,7 +154,7 @@ def capture_signals(signals=None, callback=None,die=False, **kwargs):
     try:
         yield
     except KeyboardInterrupt as e:
-        tqdm.write(e)
+        tqdm.write(str(e))
         if die:
             raise e
     finally:
@@ -297,7 +297,7 @@ def timer_metric(engine, name='timer'):
     )
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     with capture_signals():
         import time
         time.sleep(200)

@@ -5,10 +5,8 @@ import json
 import torch
 
 """
-Dummy inference script echoes input as output
+Runs inference on SageMaker
 """
-
-print("Loaded inference.py: {}".format(__file__))
 
 
 def model_fn(model_dir):

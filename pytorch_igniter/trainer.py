@@ -22,7 +22,7 @@ from ignite.engine import Engine, Events
 from ignite.handlers import ModelCheckpoint, Timer
 from ignite.metrics import RunningAverage
 from pytorch_igniter.metrics import SafeAverage
-
+from pytorch_igniter.export import export_all, export_code, export_model
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 from torch.autograd import backward
@@ -32,24 +32,10 @@ from .engine import build_engine
 from .util import handle_exception, get_last_checkpoint, get_metrics, capture_signals
 from .ssm import get_secret
 import re
+import pytorch_igniter.copyxattr_patch
+
 LOADED = "Loaded {}, epoch {}, iteration {}"
 COMPLETE = "Training complete"
-
-# have to monkey patch to work with WSL as workaround for https://bugs.python.org/issue38633
-import errno, shutil
-orig_copyxattr = shutil._copyxattr
-def patched_copyxattr(src, dst, *, follow_symlinks=True):
-	try:
-		orig_copyxattr(src, dst, follow_symlinks=follow_symlinks)
-	except OSError as ex:
-		if ex.errno != errno.EACCES: raise
-shutil._copyxattr = patched_copyxattr
-
-def ignore(path, names):
-    return [
-        name for name in names
-        if re.match("__pycache__|\\.git", name)
-    ]
 
 
 def train(
@@ -151,7 +137,10 @@ def train(
                 _, last_iteration = get_last_checkpoint(
                     checkpoint_handler=checkpoint_handler)
                 if last_iteration is None or last_iteration < engine.state.iteration:
-                    checkpoint_handler(engine=engine, to_save=to_save)
+                    checkpoint_handler(
+                        engine=engine,
+                        to_save=to_save
+                    )
 
         trainer.add_event_handler(
             event_name=save_event,
@@ -231,70 +220,11 @@ def train(
                     epoch_length=train_spec.epoch_length)
         safe_checkpoint_handler(engine=trainer, to_save=to_save)
         if model_dir:
-            os.makedirs(model_dir, exist_ok=True)
-            # todo just export model
-            torch.save(
-                # {k: v.state_dict() for k, v in to_save.items()},
-                {"model": model.state_dict()},
-                os.path.join(model_dir, 'model.pt')
+            export_all(
+                model_dir=model_dir,
+                model=model,
+                inference_args=inference_args,
+                inference_spec=inference_spec
             )
-            if inference_args:
-                with open(os.path.join(model_dir, 'args.json'), 'w') as f:
-                    json.dump(vars(inference_args), f)
-            if inference_spec:
-                # with open(os.path.join(model_dir,'config.json'),'w') as f:
-                #    json.dump({
-                #        "inferencer_module": inference_spec.inferencer.__class__.__module__,
-                #        "inferencer_class": inference_spec.inferencer.__class__.__name__,
-                #    }, f)
-                code_dir = os.path.join(model_dir, 'code')
-                os.makedirs(code_dir, exist_ok=True)
-                for dep in inference_spec.dependencies:
-                    dep = module_path(dep)
-                    des = os.path.join(
-                            code_dir, os.path.basename(dep)
-                        )
-                    if os.path.exists(des):
-                        shutil.rmtree(des)
-                    shutil.copytree(
-                        dep,
-                        des,
-                        #dirs_exist_ok=True,
-                        ignore=ignore
-                    )
-                if inference_spec.requirements:
-                    shutil.copyfile(inference_spec.requirements, os.path.join(
-                        code_dir, 'requirements.txt'
-                    ))
-                inference_py = os.path.join(code_dir, 'inference.py')
-                shutil.copyfile(
-                    pytorch_igniter.inference.inference.__file__,
-                    inference_py
-                )
-                with open(inference_py, 'a') as f:
-                    f.write("\n")
-                    f.write("\n")
-                    from types import FunctionType
-                    if isinstance(inference_spec.input_fn, str):
-                        f.write("{}\n".format(inference_spec.input_fn))
-                    else:
-                        f.write("from {} import {} as input_fn\n".format(
-                            inference_spec.input_fn.__module__,
-                            inference_spec.input_fn.__name__
-                        ))
-                    if isinstance(inference_spec.output_fn, str):
-                        f.write("{}\n".format(inference_spec.output_fn))
-                    else:
-                        f.write("from {} import {} as output_fn\n".format(
-                            inference_spec.output_fn.__module__,
-                            inference_spec.output_fn.__name__
-                        ))
-                    if isinstance(inference_spec.inferencer, str):
-                        f.write("{}\n".format(inference_spec.inferencer))
-                    else:
-                        f.write("from {} import {} as inferencer_fn\n".format(
-                            inference_spec.inferencer.__module__,
-                            inference_spec.inferencer.__name__
-                        ))
 
         return get_metrics(engine=trainer)
