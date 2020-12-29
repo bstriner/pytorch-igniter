@@ -6,3 +6,5 @@ sagemaker
 torch
 torchvision
 aws-sagemaker-remote
+pandas
+numpy
