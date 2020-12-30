@@ -6,6 +6,7 @@ from ignite.engine import Engine, Events
 from .util import chain_callbacks, auto_metric, timer_metric, print_logs, save_logs, create_plots, tensors_to_device
 from ignite.contrib.handlers import ProgressBar
 from ignite.contrib.handlers.mlflow_logger import OutputHandler, global_step_from_engine
+import sys
 LOGS_FNAME = "logs.tsv"
 PLOT_FNAME = "plot.svg"
 
@@ -58,7 +59,7 @@ def build_engine(
 
     # Progress bar
     if spec.enable_pbar:
-        ProgressBar().attach(engine, metric_names=spec.pbar_metrics)
+        ProgressBar(file=sys.stdout).attach(engine, metric_names=spec.pbar_metrics)
 
     # Print logs
     if spec.print_event is not None:

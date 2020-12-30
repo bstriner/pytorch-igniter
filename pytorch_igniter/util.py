@@ -13,6 +13,7 @@ import signal
 from contextlib import contextmanager
 import numpy as np
 import warnings
+import sys
 
 EVAL_MESSAGE = "[{epoch}/{max_epochs}][{i}/{max_i}][Evaluation]"
 TRAIN_MESSAGE = "[{epoch}/{max_epochs}][{i}/{max_i}]"
@@ -57,13 +58,15 @@ def print_logs(engine, trainer=None, fmt=TRAIN_MESSAGE, metric_fmt=" | {name}: {
         epoch=trainer.state.epoch,
         max_epochs=trainer.state.max_epochs,
         i=engine.state.iteration -
-        ((engine.state.epoch-1)*engine.state.epoch_length),
-        max_i=engine.state.epoch_length
+        ((engine.state.epoch-1)*engine.state.epoch_length)
+        if engine.state.epoch_length else engine.state.iteration,
+        max_i=engine.state.epoch_length or "?"
     )
     for name, value in get_metrics(engine, metric_names=metric_names).items():
         message += metric_fmt.format(
             name=name, value=str(round(value, 3)))
-    tqdm.write(message)
+    tqdm.write(message, file=sys.stdout)
+    sys.stdout.flush()
 
 
 def save_logs(engine, fname, trainer=None, metric_names='all'):
@@ -114,7 +117,7 @@ def create_plots(engine, logs_fname, plots_fname, metric_names='all'):
 def handle_exception(engine, e, callback=None, **kwargs):
     if isinstance(e, KeyboardInterrupt):
         engine.terminate()
-        tqdm.write(INTERRUPTED)
+        tqdm.write(INTERRUPTED, file=sys.stdout)
         if callback is not None:
             callback(engine, **kwargs)
     else:
@@ -154,7 +157,7 @@ def capture_signals(signals=None, callback=None, die=False, **kwargs):
     try:
         yield
     except KeyboardInterrupt as e:
-        tqdm.write(str(e))
+        tqdm.write(str(e), file=sys.stdout)
         if die:
             raise e
     finally:

@@ -6,14 +6,19 @@ def event_argument(event):
     elif isinstance(event, (Events, CallableEventWithFilter)):
         return event
     elif isinstance(event, str):
-        m = re.match("^([A-Z_]+)(\\(.*\\))?$", event)
+        m = re.match("^(?:([A-Za-z_]+)\\.)?([A-Za-z_]+)(\\(.*\\))?$", event)
         if not m:
             raise ValueError("Invalid event format: {}. Should be something like \"ITERATION_COMPLETED(every=100)\".".format(event))
-        evt = m.group(1)
-        if not hasattr(Events, evt):
+        cls = m.group(1)
+        if cls:
+            cls = eval(cls)
+        else:
+            cls = Events
+        evt = m.group(2)
+        if not hasattr(cls, evt):
             raise ValueError("Invalid event name: {}".format(evt))
         evt = getattr(Events, evt)
-        filt = m.group(2)
+        filt = m.group(3)
         if not filt:
             return evt
         else:
@@ -31,4 +36,5 @@ if __name__=='__main__':
     print(event_argument(Events.ITERATION_COMPLETED))
     print(event_argument(Events.ITERATION_COMPLETED(every=10)))
     print(event_argument("ITERATION_COMPLETED"))
-    print(event_argument("ITERATION_COMPLETED(every=10)"))
+    print(event_argument("ITERATION_COMPLETED(every=11)"))
+    print(event_argument("Events.ITERATION_COMPLETED(every=12)"))

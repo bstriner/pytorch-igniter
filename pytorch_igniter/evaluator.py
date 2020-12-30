@@ -7,6 +7,7 @@ from .util import load_from, get_metrics
 from tqdm import tqdm
 import torch
 import mlflow
+import sys
 
 def dummy_step(engine, batch):
     pass
@@ -35,7 +36,7 @@ def evaluate(
             tqdm.write("Loaded epoch {} iteration {} from {}".format(
                 dummy_trainer.state.epoch,
                 dummy_trainer.state.iteration, 
-                path))
+                path), file=sys.stdout)
             assert iteration == dummy_trainer.state.iteration
             if trainer is None:
                 trainer = dummy_trainer

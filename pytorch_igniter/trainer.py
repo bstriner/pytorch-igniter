@@ -33,6 +33,7 @@ from .util import handle_exception, get_last_checkpoint, get_metrics, capture_si
 from .ssm import get_secret
 import re
 import pytorch_igniter.copyxattr_patch
+import sys
 
 LOADED = "Loaded {}, epoch {}, iteration {}"
 COMPLETE = "Training complete"
@@ -64,13 +65,32 @@ def train(
     is_sagemaker=False,
     sagemaker_job_name=None,
     inference_spec=None,
-    inference_args=None
+    inference_args=None,
+    eval_pbar=None,
+    train_pbar=None,
+    train_print_event=None,
+    eval_print_event=None,
+    eval_log_event=None,
+    train_log_event=None
 ):
     """
     Train a model
     """
     save_event = event_argument(save_event)
     eval_event = event_argument(eval_event)
+    if eval_spec is not None:
+        if eval_pbar is not None:
+            eval_spec.enable_pbar = eval_pbar
+        if eval_print_event is not None:
+            eval_spec.print_event = event_argument(eval_print_event)
+        if eval_log_event is not None:
+            eval_spec.log_event = event_argument(eval_log_event)
+    if train_pbar is not None:
+        train_spec.enable_pbar = train_pbar
+    if train_print_event is not None:
+        train_spec.print_event = event_argument(train_print_event)
+    if train_log_event is not None:
+        train_spec.log_event = event_argument(train_log_event)
     if max_epochs:
         train_spec.max_epochs = max_epochs
     if mlflow_tracking_uri:
@@ -205,10 +225,13 @@ def train(
                 for key, value in to_save.items():
                     value.load_state_dict(checkpoint_data[key])
                 tqdm.write(LOADED.format(
-                    checkpoint_file, trainer.state.epoch, trainer.state.iteration))
+                    checkpoint_file, trainer.state.epoch, trainer.state.iteration),
+                    file=sys.stdout)
                 if Engine._is_done(trainer.state):
                     # Training complete
-                    tqdm.write(COMPLETE)
+                    tqdm.write(
+                        COMPLETE,
+                        file=sys.stdout)
                 else:
                     # Continue training
                     trainer.run(train_spec.loader)
